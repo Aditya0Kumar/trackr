@@ -1,11 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import AddReport from "./pages/AddReport";
-import Reports from "./pages/Reports";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import AddReport from "./pages/AddReport.jsx";
+import Reports from "./pages/Reports.jsx";
 import Navbar from "./components/navbar.jsx";
-import PrivateRoute from "./components/PrivateRoute";
+import PrivateRoute from "./components/PrivateRoutes.jsx";
 
 
 function App() {
