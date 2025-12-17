@@ -19,8 +19,8 @@ const TaskStatusTabs = ({ tabs = [], activeTab, setActiveTab }) => {
                             className={`relative px-3 md:px-4 py-2 text-sm font-medium rounded-md transition
                 ${
                     isActive
-                        ? "bg-gray-700 text-white border border-gray-600"
-                        : "bg-gray-900/30 text-gray-300 hover:bg-gray-900/50"
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }
               `}
                         >
@@ -29,8 +29,8 @@ const TaskStatusTabs = ({ tabs = [], activeTab, setActiveTab }) => {
                                 <span
                                     className={`text-xs px-2 py-0.5 rounded-full ${
                                         isActive
-                                            ? "bg-white/10 text-white"
-                                            : "bg-gray-800 text-gray-300"
+                                            ? "bg-white/20 text-white"
+                                            : "bg-white text-gray-600 border border-gray-300"
                                     }`}
                                 >
                                     {tab.count ?? 0}
@@ -38,7 +38,7 @@ const TaskStatusTabs = ({ tabs = [], activeTab, setActiveTab }) => {
                             </div>
 
                             {isActive && (
-                                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-white/20 rounded" />
+                                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-indigo-600 rounded" />
                             )}
                         </button>
                     );

@@ -10,7 +10,52 @@ const todoSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    
+    completedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null,
+    },
+    
+    verified: {
+        type: Boolean,
+        default: false,
+    },
 });
+
+const commentSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        text: {
+            type: String,
+            required: true,
+        },
+    },
+    { timestamps: true }
+);
+
+const activityLogSchema = new mongoose.Schema(
+    {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        action: {
+            type: String,
+            required: true,
+            // Examples: "created_task", "updated_title", "changed_priority", "assigned_user", "removed_user", "added_attachment", "removed_attachment", "completed_todo", "uncompleted_todo", "verified_todo", "unverified_todo", "changed_status", "added_comment"
+        },
+        details: {
+            type: String, // e.g., "from 'Low' to 'High'", "added 'Fix bug'", "status changed to 'In Progress'"
+        },
+    },
+    { timestamps: true }
+);
 
 const taskSchema = new mongoose.Schema(
     {
@@ -31,7 +76,7 @@ const taskSchema = new mongoose.Schema(
 
         status: {
             type: String,
-            enum: ["Pending", "In Progress", "Completed"],
+            enum: ["Pending", "In Progress", "Completed", "Awaiting Verification"],
             default: "Pending",
         },
 
@@ -63,6 +108,30 @@ const taskSchema = new mongoose.Schema(
         todoChecklist: [todoSchema],
 
         progress: { type: Number, default: 0 },
+
+        comments: [commentSchema],
+
+        statusHistory: [
+            {
+                user: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                    required: true,
+                },
+                status: {
+                    type: String,
+                    enum: ["Pending", "In Progress", "Completed", "Awaiting Verification"],
+                    required: true,
+                },
+            },
+        ], // Keep for now, but will be replaced by activityLog for display
+
+        activityLog: [activityLogSchema], // New comprehensive activity log
+        
+        isArchived: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

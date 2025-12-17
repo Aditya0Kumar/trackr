@@ -7,36 +7,38 @@ import {
     TrendingUp,
     PlayCircle,
     CheckCircle2,
+    HardHat, // New icon for construction theme
+    ClipboardCheck, // New icon for verification
 } from "lucide-react";
 
 const HowItWorks = () => {
     const steps = [
         {
-            icon: UserPlus,
-            title: "Sign Up & Create Team",
+            icon: HardHat, // Changed icon
+            title: "Setup Site & Team",
             description:
-                "Create your account in 30 seconds and set up your team workspace. Invite members with just their email.",
+                "Create your account and define your construction site structure. Invite site managers and engineers easily.",
             color: "from-blue-500 to-cyan-500",
         },
         {
             icon: LayoutDashboard,
-            title: "Set Up Your Projects",
+            title: "Define Milestones & Tasks",
             description:
-                "Create projects, organize tasks, and set priorities. Use our templates or create custom workflows.",
+                "Break down the project into phases and tasks. Set clear deadlines and assign responsibilities.",
             color: "from-purple-500 to-pink-500",
         },
         {
-            icon: Target,
-            title: "Assign & Collaborate",
+            icon: ClipboardCheck, // Changed icon
+            title: "Execute & Request Verification",
             description:
-                "Assign tasks to team members, set deadlines, and collaborate in real-time with comments and updates.",
+                "Engineers complete tasks on-site and submit them for verification using mandatory checklists.",
             color: "from-green-500 to-emerald-500",
         },
         {
             icon: TrendingUp,
-            title: "Track & Optimize",
+            title: "Verify & Report Progress",
             description:
-                "Monitor progress with advanced analytics, generate reports, and optimize your workflow for better results.",
+                "Managers verify completion, generate progress reports, and optimize the workflow for faster delivery.",
             color: "from-orange-500 to-red-500",
         },
     ];
@@ -102,13 +104,13 @@ const HowItWorks = () => {
                         className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-4"
                     >
                         <PlayCircle className="w-4 h-4" />
-                        Simple Process
+                        Simple Site Workflow
                     </motion.div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                        How Project Flow
+                        How Trackr
                         <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                             {" "}
-                            Works
+                            Manages Construction
                         </span>
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -229,121 +231,109 @@ const HowItWorks = () => {
                                 >
                                     <div className="relative">
                                         {/* Mockup Container */}
-                                        {/* Image/Visual Side */}
                                         <motion.div
-                                            variants={imageVariants}
-                                            className="flex-1 lg:pl-12"
+                                            whileHover={{
+                                                y: -10,
+                                                scale: 1.02,
+                                            }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 300,
+                                            }}
+                                            className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 relative overflow-hidden"
                                         >
-                                            <div className="relative">
-                                                {/* Mockup Container */}
-                                                <motion.div
-                                                    whileHover={{
-                                                        y: -10,
-                                                        scale: 1.02,
-                                                    }}
-                                                    transition={{
-                                                        type: "spring",
-                                                        stiffness: 300,
-                                                    }}
-                                                    className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 relative overflow-hidden"
-                                                >
-                                                    {/* Mockup Content */}
-                                                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-8">
-                                                        <div className="space-y-4">
-                                                            {/* Mock Header */}
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center gap-3">
+                                            {/* Mockup Content */}
+                                            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-8">
+                                                <div className="space-y-4">
+                                                    {/* Mock Header */}
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className={`w-3 h-3 rounded-full bg-gradient-to-r ${step.color}`}
+                                                            />
+                                                            <div className="text-sm font-semibold text-gray-700">
+                                                                Phase{" "}
+                                                                {index + 1}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex gap-1">
+                                                            {[
+                                                                1, 2, 3,
+                                                            ].map(
+                                                                (dot) => (
                                                                     <div
-                                                                        className={`w-3 h-3 rounded-full bg-gradient-to-r ${step.color}`}
-                                                                    />
-                                                                    <div className="text-sm font-semibold text-gray-700">
-                                                                        Step{" "}
-                                                                        {index +
-                                                                            1}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex gap-1">
-                                                                    {[
-                                                                        1, 2, 3,
-                                                                    ].map(
-                                                                        (
+                                                                        key={
                                                                             dot
-                                                                        ) => (
-                                                                            <div
-                                                                                key={
-                                                                                    dot
-                                                                                }
-                                                                                className="w-2 h-2 rounded-full bg-gray-300"
-                                                                            />
-                                                                        )
-                                                                    )}
-                                                                </div>
-                                                            </div>
-
-                                                            {/* Mock Content */}
-                                                            <div className="space-y-3">
-                                                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                                                <div className="h-20 bg-gray-200 rounded mt-4"></div>
-                                                            </div>
-
-                                                            {/* Mock Progress */}
-                                                            <div className="pt-4">
-                                                                <div className="flex justify-between text-xs text-gray-500 mb-2">
-                                                                    <span>
-                                                                        Progress
-                                                                    </span>
-                                                                    <span>
-                                                                        {(
-                                                                            ((index +
-                                                                                1) /
-                                                                                steps.length) *
-                                                                            100
-                                                                        ).toFixed(
-                                                                            0
-                                                                        )}
-                                                                        %
-                                                                    </span>
-                                                                </div>
-                                                                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                                                    <motion.div
-                                                                        initial={{
-                                                                            width: 0,
-                                                                        }}
-                                                                        whileInView={{
-                                                                            width: `${
-                                                                                ((index +
-                                                                                    1) /
-                                                                                    steps.length) *
-                                                                                100
-                                                                            }%`,
-                                                                        }}
-                                                                        transition={{
-                                                                            duration: 1,
-                                                                            delay: 0.5,
-                                                                        }}
-                                                                        className={`h-full bg-gradient-to-r ${step.color}`}
+                                                                        }
+                                                                        className="w-2 h-2 rounded-full bg-gray-300"
                                                                     />
-                                                                </div>
-                                                            </div>
+                                                                )
+                                                            )}
                                                         </div>
                                                     </div>
 
-                                                    {/* Floating Elements */}
-                                                    <motion.div
-                                                        animate={{
-                                                            y: [0, -20, 0],
-                                                            rotate: [0, 5, 0],
-                                                        }}
-                                                        transition={{
-                                                            duration: 4,
-                                                            repeat: Infinity,
-                                                            delay: index * 0.5,
-                                                        }}
-                                                        className={`absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r ${step.color} rounded-lg opacity-20`}
-                                                    />
-                                                </motion.div>
+                                                    {/* Mock Content */}
+                                                    <div className="space-y-3">
+                                                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                                        <div className="h-20 bg-gray-200 rounded mt-4"></div>
+                                                    </div>
+
+                                                    {/* Mock Progress */}
+                                                    <div className="pt-4">
+                                                        <div className="flex justify-between text-xs text-gray-500 mb-2">
+                                                            <span>
+                                                                Site Progress
+                                                            </span>
+                                                            <span>
+                                                                {(
+                                                                    ((index +
+                                                                        1) /
+                                                                        steps.length) *
+                                                                    100
+                                                                ).toFixed(
+                                                                    0
+                                                                )}
+                                                                %
+                                                            </span>
+                                                        </div>
+                                                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                            <motion.div
+                                                                initial={{
+                                                                    width: 0,
+                                                                }}
+                                                                whileInView={{
+                                                                    width: `${
+                                                                        ((index +
+                                                                            1) /
+                                                                            steps.length) *
+                                                                        100
+                                                                    }%`,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 1,
+                                                                    delay: 0.5,
+                                                                }}
+                                                                className={`h-full bg-gradient-to-r ${step.color}`}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
+
+                                            {/* Floating Elements */}
+                                            <motion.div
+                                                animate={{
+                                                    y: [0, -20, 0],
+                                                    rotate: [0, 5, 0],
+                                                }}
+                                                transition={{
+                                                    duration: 4,
+                                                    repeat: Infinity,
+                                                    delay: index * 0.5,
+                                                }}
+                                                className={`absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r ${step.color} rounded-lg opacity-20`}
+                                            />
                                         </motion.div>
                                     </div>
                                 </motion.div>
@@ -361,8 +351,8 @@ const HowItWorks = () => {
                     className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 text-center"
                 >
                     {[
-                        { number: "2min", label: "Average Setup Time" },
-                        { number: "95%", label: "User Satisfaction" },
+                        { number: "2min", label: "Site Setup Time" },
+                        { number: "95%", label: "Manager Satisfaction" },
                         { number: "24/7", label: "Support Available" },
                         { number: "99.9%", label: "Uptime Guarantee" },
                     ].map((stat, index) => (

@@ -7,50 +7,52 @@ import {
     Shield,
     Clock,
     MessageSquare,
+    CheckSquare, // New icon for verification
+    MapPin, // New icon for site location/tracking
 } from "lucide-react";
 
 const FeaturesSection = () => {
     const features = [
         {
-            icon: Zap,
-            title: "Lightning Fast",
+            icon: CheckSquare, // Changed icon
+            title: "Verification Checklists",
             description:
-                "Experience blazing fast performance with our optimized task management system. No more waiting for pages to load.",
-            color: "from-yellow-500 to-orange-500",
+                "Ensure quality control with mandatory checklist verification by site managers before task completion.",
+            color: "from-green-500 to-emerald-500", // Green theme for quality
         },
         {
             icon: Users,
-            title: "Team Collaboration",
+            title: "Site Team Collaboration",
             description:
-                "Work seamlessly with your team. Assign tasks, share updates, and collaborate in real-time.",
+                "Assign tasks to specific site engineers, share blueprints, and collaborate in real-time.",
             color: "from-blue-500 to-cyan-500",
         },
         {
             icon: BarChart3,
-            title: "Advanced Analytics",
+            title: "Progress Analytics",
             description:
-                "Gain insights with detailed analytics and reports. Track progress and identify bottlenecks.",
-            color: "from-green-500 to-emerald-500",
+                "Gain insights with detailed reports on task completion rates, bottlenecks, and team performance.",
+            color: "from-yellow-500 to-orange-500", // Yellow/Orange theme for tracking
         },
         {
             icon: Shield,
-            title: "Enterprise Security",
+            title: "Secure Data Storage",
             description:
-                "Your data is protected with enterprise-grade security and regular backups.",
+                "Your project data and sensitive site information are protected with enterprise-grade security.",
             color: "from-purple-500 to-pink-500",
         },
         {
             icon: Clock,
-            title: "Time Tracking",
+            title: "Deadline Monitoring",
             description:
-                "Automatically track time spent on tasks and generate accurate timesheets.",
+                "Track time spent on tasks and receive alerts for overdue milestones to keep projects on schedule.",
             color: "from-indigo-500 to-blue-500",
         },
         {
             icon: MessageSquare,
-            title: "Real-time Chat",
+            title: "Site Communication",
             description:
-                "Communicate with your team through integrated real-time messaging and comments.",
+                "Communicate instantly with your team through integrated real-time messaging and task comments.",
             color: "from-red-500 to-pink-500",
         },
     ];
@@ -111,14 +113,14 @@ const FeaturesSection = () => {
                         }}
                         className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-4"
                     >
-                        <Zap className="w-4 h-4" />
-                        Powerful Features
+                        <MapPin className="w-4 h-4" />
+                        Essential Site Features
                     </motion.div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                        Everything You Need to
+                        Tools Built for
                         <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             {" "}
-                            Succeed
+                            Construction Managers
                         </span>
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -233,12 +235,12 @@ const FeaturesSection = () => {
 
                         <div className="relative z-10">
                             <h3 className="text-2xl sm:text-3xl font-bold mb-4">
-                                Ready to Transform Your Workflow?
+                                Ready to Transform Your Site Management?
                             </h3>
                             <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-                                Join thousands of teams who have already
+                                Join thousands of construction teams who have already
                                 streamlined their project management with
-                                Project Flow.
+                                Trackr.
                             </p>
                             <motion.button
                                 whileHover={{ scale: 1.05 }}

@@ -27,7 +27,7 @@ const CustomBarChart = ({ data }) => {
     const CustomToolTip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-gray-900 border border-gray-700 px-3 py-2 rounded-md shadow-md backdrop-blur-md">
+                <div className="bg-gray-800 border border-gray-700 px-3 py-2 rounded-md shadow-md">
                     <p className="text-xs text-gray-300 mb-1">
                         Priority:
                         <span className="font-semibold text-white ml-1">
@@ -48,25 +48,25 @@ const CustomBarChart = ({ data }) => {
     };
 
     return (
-        <div className="bg-gray-900/40 backdrop-blur-xl border border-gray-800 rounded-xl p-4 mt-6 shadow-md">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mt-6 shadow-md">
             <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={data}>
-                    <CartesianGrid stroke="rgba(255,255,255,0.08)" />
+                    <CartesianGrid stroke="rgba(0,0,0,0.1)" strokeDasharray="3 3" />
 
                     <XAxis
                         dataKey="priority"
-                        tick={{ fill: "#ccc", fontSize: 12 }}
+                        tick={{ fill: "#64748b", fontSize: 12 }}
                         stroke="none"
                     />
 
                     <YAxis
-                        tick={{ fill: "#ccc", fontSize: 12 }}
+                        tick={{ fill: "#64748b", fontSize: 12 }}
                         stroke="none"
                     />
 
                     <Tooltip
                         content={<CustomToolTip />}
-                        cursor={{ fill: "transparent" }}
+                        cursor={{ fill: "rgba(0,0,0,0.05)" }}
                     />
 
                     <Bar dataKey="count" radius={[8, 8, 0, 0]}>

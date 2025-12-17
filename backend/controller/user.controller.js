@@ -8,23 +8,43 @@ export const getUsers = async (req, res, next) => {
 
         const userWithTaskCounts = await Promise.all(
             users.map(async (user) => {
+                const userId = user._id;
+
                 const pendingTasks = await Task.countDocuments({
-                    assignedTo: user._id,
+                    assignedTo: userId,
                     status: "Pending",
                 });
 
                 const inProgressTasks = await Task.countDocuments({
-                    assignedTo: user._id,
+                    assignedTo: userId,
                     status: "In Progress",
                 });
 
                 const completedTasks = await Task.countDocuments({
-                    assignedTo: user._id,
+                    assignedTo: userId,
                     status: "Completed",
                 });
 
+                const totalTasks = await Task.countDocuments({
+                    assignedTo: userId,
+                });
+
+                const overdueTasks = await Task.countDocuments({
+                    assignedTo: userId,
+                    status: { $ne: "Completed" },
+                    dueDate: { $lt: new Date() },
+                });
+
+                const completionRate =
+                    totalTasks > 0
+                        ? Math.round((completedTasks / totalTasks) * 100)
+                        : 0;
+
                 return {
                     ...user._doc,
+                    totalTasks,
+                    overdueTasks,
+                    completionRate,
                     pendingTasks,
                     inProgressTasks,
                     completedTasks,

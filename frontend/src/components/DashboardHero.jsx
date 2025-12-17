@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import moment from "moment";
 
 const DashboardHero = ({ currentUser, navigate }) => {
     const { ref, inView } = useInView({
@@ -14,12 +15,11 @@ const DashboardHero = ({ currentUser, navigate }) => {
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="
-        bg-gray-800/70
-        border border-gray-700
+        bg-white
+        border border-gray-200
         rounded-xl
         p-6
-        shadow-md
-        backdrop-blur-sm
+        shadow-lg
       "
         >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -30,7 +30,7 @@ const DashboardHero = ({ currentUser, navigate }) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={inView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.5 }}
-                        className="text-2xl md:text-3xl font-bold text-white relative inline-block"
+                        className="text-2xl md:text-3xl font-bold text-gray-900 relative inline-block"
                     >
                         Welcome, {currentUser?.name}
                         {/* UNDERLINE */}
@@ -49,7 +49,7 @@ const DashboardHero = ({ currentUser, navigate }) => {
                 h-[2px]
                 w-full
                 origin-left
-                bg-white/40
+                bg-indigo-500/40
                 rounded-full
               "
                         />
@@ -60,7 +60,7 @@ const DashboardHero = ({ currentUser, navigate }) => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={inView ? { opacity: 1, x: 0 } : {}}
                         transition={{ duration: 0.5, delay: 0.15 }}
-                        className="text-gray-400 text-sm mt-1"
+                        className="text-gray-500 text-sm mt-1"
                     >
                         {moment().format("dddd, Do MMMM YYYY")}
                     </motion.p>
@@ -73,13 +73,13 @@ const DashboardHero = ({ currentUser, navigate }) => {
                     transition={{ duration: 0.4, delay: 0.25 }}
                     onClick={() => navigate("/admin/create-task")}
                     className="
-            bg-white
-            text-black
+            bg-indigo-600
+            text-white
             font-semibold
             px-5 py-2.5
             rounded-lg
-            shadow
-            hover:bg-gray-200
+            shadow-md
+            hover:bg-indigo-700
             transition
           "
                 >

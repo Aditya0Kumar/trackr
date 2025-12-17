@@ -9,6 +9,10 @@ import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import taskRoutes from "./routes/task.route.js";
 import reportRoutes from "./routes/report.route.js";
+import commentRoutes from "./routes/comment.route.js";
+import notificationRoutes from "./routes/notification.route.js";
+import attendanceRoutes from "./routes/attendance.route.js"; // Import attendance routes
+import rectificationRoutes from "./routes/rectification.route.js"; // Import rectification routes
 import { fileURLToPath } from "url";
 
 dotenv.config();
@@ -48,6 +52,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/comments", commentRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/attendance", attendanceRoutes); // Use attendance routes
+app.use("/api/rectifications", rectificationRoutes); // Use rectification routes
 
 app.use("/assets/uploads", express.static(path.join(__dirname, "assets/uploads")));
 

@@ -111,6 +111,11 @@ export const updateUserProfile = async (req, res, next) => {
 
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
+        
+        // Add logic to update profileImageUrl
+        if (req.body.profileImageUrl) {
+            user.profileImageUrl = req.body.profileImageUrl;
+        }
 
         if (req.body.password) {
             user.password = bcryptjs.hashSync(req.body.password, 10);
@@ -118,7 +123,7 @@ export const updateUserProfile = async (req, res, next) => {
 
         const updatedUser = await user.save();
 
-        const { password: pass, ...rest } = user._doc;
+        const { password: pass, ...rest } = updatedUser._doc; // Use updatedUser._doc here
 
         res.status(200).json(rest);
     } catch (error) {

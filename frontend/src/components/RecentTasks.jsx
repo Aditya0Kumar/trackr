@@ -8,36 +8,36 @@ const RecentTasks = ({ tasks }) => {
     const statusColor = (status) => {
         switch (status) {
             case "Completed":
-                return "bg-green-900/40 text-green-300 border border-green-700";
+                return "bg-green-100 text-green-700 border border-green-300";
             case "Pending":
-                return "bg-red-900/40 text-red-300 border border-red-700";
+                return "bg-red-100 text-red-700 border border-red-300";
             default:
-                return "bg-yellow-900/40 text-yellow-300 border border-yellow-700";
+                return "bg-yellow-100 text-yellow-700 border border-yellow-300";
         }
     };
 
     const priorityColor = (priority) => {
         switch (priority) {
             case "High":
-                return "bg-red-900/40 text-red-300 border border-red-700";
+                return "bg-red-50 text-red-600 border border-red-200";
             case "Medium":
-                return "bg-yellow-900/40 text-yellow-300 border border-yellow-700";
+                return "bg-yellow-50 text-yellow-600 border border-yellow-200";
             default:
-                return "bg-gray-800 text-gray-300 border border-gray-600";
+                return "bg-gray-100 text-gray-600 border border-gray-300";
         }
     };
 
     return (
-        <div className="bg-gray-900/40 mt-20 backdrop-blur-xl border border-gray-800 rounded-xl shadow-lg">
+        <div className="bg-white mt-6 border border-gray-200 rounded-xl shadow-lg">
             {/* HEADER */}
-            <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-200">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">
                     Recent Tasks
                 </h3>
 
                 <button
                     onClick={() => navigate("/admin/tasks")}
-                    className="text-blue-400 hover:text-blue-300 text-sm font-medium transition p-2 rounded-md hover:bg-gray-800/50"
+                    className="text-indigo-600 hover:text-indigo-700 text-sm font-medium transition p-2 rounded-md hover:bg-gray-100"
                 >
                     See More →
                 </button>
@@ -48,11 +48,11 @@ const RecentTasks = ({ tasks }) => {
                 {tasks?.length ? (
                     <table className="w-full">
                         <thead>
-                            <tr className="text-gray-400 text-xs uppercase">
-                                <th className="py-2 text-left">Task Name</th>
-                                <th className="py-2 text-left">Status</th>
-                                <th className="py-2 text-left">Priority</th>
-                                <th className="py-2 text-left">Created On</th>
+                            <tr className="text-gray-500 text-xs uppercase border-b border-gray-200">
+                                <th className="py-3 text-left font-medium">Task Name</th>
+                                <th className="py-3 text-left font-medium">Status</th>
+                                <th className="py-3 text-left font-medium">Priority</th>
+                                <th className="py-3 text-left font-medium">Created On</th>
                             </tr>
                         </thead>
 
@@ -60,15 +60,15 @@ const RecentTasks = ({ tasks }) => {
                             {tasks.map((task) => (
                                 <tr
                                     key={task._id}
-                                    className="border-b border-gray-800 hover:bg-gray-800/40"
+                                    className="border-b border-gray-100 hover:bg-gray-50 transition"
                                 >
-                                    <td className="py-3 text-sm text-gray-200">
+                                    <td className="py-3 text-sm text-gray-800">
                                         {task.title}
                                     </td>
 
                                     <td className="py-3">
                                         <span
-                                            className={`px-2 py-1 text-xs rounded-full ${statusColor(
+                                            className={`px-2 py-1 text-xs rounded-full font-medium ${statusColor(
                                                 task.status
                                             )}`}
                                         >
@@ -78,7 +78,7 @@ const RecentTasks = ({ tasks }) => {
 
                                     <td className="py-3">
                                         <span
-                                            className={`px-2 py-1 text-xs rounded-full ${priorityColor(
+                                            className={`px-2 py-1 text-xs rounded-full font-medium ${priorityColor(
                                                 task.priority
                                             )}`}
                                         >
@@ -86,7 +86,7 @@ const RecentTasks = ({ tasks }) => {
                                         </span>
                                     </td>
 
-                                    <td className="py-3 text-sm text-gray-400">
+                                    <td className="py-3 text-sm text-gray-500">
                                         {moment(task.createdAt).format(
                                             "MMM Do, YYYY"
                                         )}

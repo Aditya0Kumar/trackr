@@ -8,8 +8,11 @@ import RecentTasks from "../../components/RecentTasks";
 import CustomPieChart from "../../components/CustomPieChart";
 import CustomBarChart from "../../components/CustomBarChart";
 import { motion } from "framer-motion";
+import DashboardIllustration from "../../assets/undraw_dashboard_p93p.svg";
+import DashboardStatSkeleton from "../../components/DashboardStatSkeleton";
 
-const STATUS_COLORS = ["#EF4444", "#FACC15", "#22C55E"];
+// Updated colors to include Awaiting Verification (Orange)
+const STATUS_COLORS = ["#EF4444", "#FACC15", "#F97316", "#22C55E"]; // Red, Yellow, Orange, Green
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -26,8 +29,9 @@ const Dashboard = () => {
         setPieChartData([
             { status: "Pending", count: dist.Pending || 0 },
             { status: "In Progress", count: dist.InProgress || 0 },
+            { status: "Awaiting Verification", count: dist.AwaitingVerification || 0 },
             { status: "Completed", count: dist.Completed || 0 },
-        ]);
+        ].filter(item => item.count > 0)); // Filter out zero counts for cleaner chart
 
         setBarChartData([
             { priority: "Low", count: lvl.Low || 0 },
@@ -55,25 +59,24 @@ const Dashboard = () => {
     return (
         <DashboardLayout activeMenu="Dashboard">
             <div className="p-6 space-y-6">
-                {/* HERO */}
                 {/* HERO SECTION */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.3 }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="bg-gray-800/70 border border-gray-700 rounded-xl p-6 shadow-md backdrop-blur-sm"
+                    className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg overflow-hidden relative"
                 >
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        {/* LEFT SIDE */}
-                        <div>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
+                        {/* LEFT SIDE: Text and Button */}
+                        <div className="flex-1">
                             {/* NAME WITH UNDERLINE */}
                             <motion.h2
                                 initial={{ opacity: 0, x: -20 }}
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true, amount: 0.4 }}
                                 transition={{ duration: 0.5 }}
-                                className="text-2xl md:text-3xl font-bold text-white relative inline-block"
+                                className="text-2xl md:text-3xl font-bold text-gray-900 relative inline-block"
                             >
                                 Welcome, {currentUser?.name}
                                 {/* UNDERLINE */}
@@ -93,7 +96,7 @@ const Dashboard = () => {
             h-[2px]
             w-full
             origin-left
-            bg-white/40
+            bg-indigo-500/40
             rounded-full
           "
                                 />
@@ -105,100 +108,197 @@ const Dashboard = () => {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true, amount: 0.4 }}
                                 transition={{ duration: 0.5, delay: 0.15 }}
-                                className="text-gray-400 text-sm mt-1"
+                                className="text-gray-500 text-sm mt-1 mb-6"
                             >
                                 {moment().format("dddd, Do MMMM YYYY")}
                             </motion.p>
-                        </div>
 
-                        {/* BUTTON */}
-                        <motion.button
-                            initial={{ opacity: 0, y: 10 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: 0.25 }}
-                            onClick={() => navigate("/admin/create-task")}
-                            className="
-        bg-white text-black
+                            {/* BUTTON */}
+                            <motion.button
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.4, delay: 0.25 }}
+                                onClick={() => navigate("/admin/create-task")}
+                                className="
+        bg-indigo-600 text-white
         font-semibold
         px-5 py-2.5
         rounded-lg
-        shadow
-        hover:bg-gray-200
+        shadow-md
+        hover:bg-indigo-700
         transition
       "
-                        >
-                            + Create Task
-                        </motion.button>
+                            >
+                                + Create Task
+                            </motion.button>
+                        </div>
+
+                        {/* RIGHT SIDE: Illustration */}
+                        <motion.img
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            src={DashboardIllustration}
+                            alt="Dashboard Illustration"
+                            className="w-full max-w-xs md:max-w-sm h-auto mt-4 md:mt-0"
+                        />
                     </div>
                 </motion.div>
 
                 {/* STATS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5 shadow-md">
-                        <p className="text-gray-400 text-sm">Total Tasks</p>
-                        <p className="text-3xl font-bold text-white mt-2">
-                            {dashboardData?.charts?.taskDistribution?.All || 0}
-                        </p>
-                    </div>
+                {dashboardData ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="bg-white border border-gray-200 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                        >
+                            <p className="text-gray-500 text-sm">Total Tasks</p>
+                            <p className="text-3xl font-bold text-gray-900 mt-2">
+                                {dashboardData?.charts?.taskDistribution?.All || 0}
+                            </p>
+                        </motion.div>
 
-                    <div className="bg-gray-900/60 border border-red-600/40 rounded-xl p-5 shadow-md">
-                        <p className="text-red-400 text-sm font-medium">
-                            Pending
-                        </p>
-                        <p className="text-3xl font-bold text-red-300 mt-2">
-                            {dashboardData?.charts?.taskDistribution?.Pending ||
-                                0}
-                        </p>
-                    </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="bg-white border border-red-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                        >
+                            <p className="text-red-600 text-sm font-medium">
+                                Pending
+                            </p>
+                            <p className="text-3xl font-bold text-red-700 mt-2">
+                                {dashboardData?.charts?.taskDistribution?.Pending ||
+                                    0}
+                            </p>
+                        </motion.div>
 
-                    <div className="bg-gray-900/60 border border-yellow-500/40 rounded-xl p-5 shadow-md">
-                        <p className="text-yellow-400 text-sm font-medium">
-                            In Progress
-                        </p>
-                        <p className="text-3xl font-bold text-yellow-300 mt-2">
-                            {dashboardData?.charts?.taskDistribution
-                                ?.InProgress || 0}
-                        </p>
-                    </div>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="bg-white border border-yellow-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                        >
+                            <p className="text-yellow-600 text-sm font-medium">
+                                In Progress
+                            </p>
+                            <p className="text-3xl font-bold text-yellow-700 mt-2">
+                                {dashboardData?.charts?.taskDistribution
+                                    ?.InProgress || 0}
+                            </p>
+                        </motion.div>
 
-                    <div className="bg-gray-900/60 border border-green-600/40 rounded-xl p-5 shadow-md">
-                        <p className="text-green-400 text-sm font-medium">
-                            Completed
-                        </p>
-                        <p className="text-3xl font-bold text-green-300 mt-2">
-                            {dashboardData?.charts?.taskDistribution
-                                ?.Completed || 0}
-                        </p>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                            className="bg-white border border-orange-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                        >
+                            <p className="text-orange-600 text-sm font-medium">
+                                Awaiting Verification
+                            </p>
+                            <p className="text-3xl font-bold text-orange-700 mt-2">
+                                {dashboardData?.charts?.taskDistribution
+                                    ?.AwaitingVerification || 0}
+                            </p>
+                        </motion.div>
+                        
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                            className="bg-white border border-green-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                        >
+                            <p className="text-green-600 text-sm font-medium">
+                                Completed
+                            </p>
+                            <p className="text-3xl font-bold text-green-700 mt-2">
+                                {dashboardData?.charts?.taskDistribution
+                                    ?.Completed || 0}
+                            </p>
+                        </motion.div>
                     </div>
-                </div>
+                ) : (
+                    <DashboardStatSkeleton />
+                )}
 
                 {/* CHARTS */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 shadow-md backdrop-blur-sm">
-                        <h3 className="text-white font-semibold mb-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="bg-white border border-gray-200 rounded-xl p-6 shadow-md"
+                    >
+                        <h3 className="text-gray-900 font-semibold mb-4">
                             Task Distribution
                         </h3>
                         <div className="h-64">
-                            <CustomPieChart
-                                data={pieChartData}
-                                colors={STATUS_COLORS}
-                            />
+                            {dashboardData ? (
+                                <CustomPieChart
+                                    data={pieChartData}
+                                    colors={STATUS_COLORS}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center animate-pulse">
+                                    <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 shadow-md backdrop-blur-sm">
-                        <h3 className="text-white font-semibold mb-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="bg-white border border-gray-200 rounded-xl p-6 shadow-md"
+                    >
+                        <h3 className="text-gray-900 font-semibold mb-4">
                             Priority Levels
                         </h3>
                         <div className="h-64">
-                            <CustomBarChart data={barChartData} />
+                            {dashboardData ? (
+                                <CustomBarChart data={barChartData} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center animate-pulse">
+                                    <div className="w-full h-full bg-gray-200 rounded-lg"></div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Recent Tasks */}
-                <RecentTasks tasks={dashboardData?.recentTasks} />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                >
+                    {dashboardData ? (
+                        <RecentTasks tasks={dashboardData?.recentTasks} />
+                    ) : (
+                        <div className="bg-white mt-6 border border-gray-200 rounded-xl shadow-lg p-6 animate-pulse">
+                            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                            <div className="space-y-3">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="h-8 bg-gray-100 rounded"></div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
             </div>
         </DashboardLayout>
     );

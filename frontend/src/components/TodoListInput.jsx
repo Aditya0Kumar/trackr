@@ -22,10 +22,10 @@ const TodoListInput = ({ todoList, setTodoList }) => {
                 <div
                     key={index}
                     className="flex items-center justify-between 
-                     bg-gray-900/50 border border-gray-800 
-                     px-3 py-2 rounded-lg mb-3"
+                     bg-white border border-gray-200 
+                     px-3 py-2 rounded-lg mb-3 shadow-sm"
                 >
-                    <p className="text-sm text-gray-200">
+                    <p className="text-sm text-gray-800">
                         <span className="text-xs text-gray-500 mr-2">
                             {index < 9 ? `0${index + 1}` : index + 1}
                         </span>
@@ -36,7 +36,7 @@ const TodoListInput = ({ todoList, setTodoList }) => {
                         type="button"
                         onClick={() => handleDeleteOption(index)}
                     >
-                        <MdDelete className="text-lg text-red-500 hover:text-red-400" />
+                        <MdDelete className="text-lg text-red-500 hover:text-red-600" />
                     </button>
                 </div>
             ))}
@@ -48,14 +48,14 @@ const TodoListInput = ({ todoList, setTodoList }) => {
                     placeholder="Add a checklist item..."
                     value={option}
                     onChange={(e) => setOption(e.target.value)}
-                    className="w-full bg-gray-900 border border-gray-800 
-                     text-gray-200 text-sm px-4 py-2 rounded-lg 
-                     focus:outline-none focus:ring-1 focus:ring-gray-600"
+                    className="w-full bg-white border border-gray-300 
+                     text-gray-900 text-sm px-4 py-2 rounded-lg 
+                     focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
 
                 <button
-                    className="flex items-center gap-2 px-5 py-2 bg-blue-600 
-                     hover:bg-blue-700 text-white rounded-md text-sm"
+                    className="flex items-center gap-2 px-5 py-2 bg-indigo-600 
+                     hover:bg-indigo-700 text-white rounded-md text-sm shadow-md"
                     type="button"
                     onClick={handleAddOption}
                 >

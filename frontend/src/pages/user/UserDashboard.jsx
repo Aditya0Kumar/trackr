@@ -7,17 +7,23 @@ import { useNavigate } from "react-router-dom";
 import RecentTasks from "../../components/RecentTasks";
 import CustomPieChart from "../../components/CustomPieChart";
 import CustomBarChart from "../../components/CustomBarChart";
+import { motion } from "framer-motion";
+import UserDashboardIllustration from "../../assets/undraw_construction-workers_z99i.svg";
+import AttendanceSummaryChart from "../../components/attendance/AttendanceSummaryChart";
+import DashboardStatSkeleton from "../../components/DashboardStatSkeleton";
 
-const COLORS = ["#FF6384", "#36A2EB", "#FFCE56"];
+// Updated colors to include Awaiting Verification (Orange)
+const COLORS = ["#FF6384", "#36A2EB", "#F97316", "#FFCE56"]; // Red, Blue, Orange, Yellow (Note: Pie chart colors are arbitrary here, but we need 4 slots)
 
 const UserDashboard = () => {
     const navigate = useNavigate();
 
     const { currentUser } = useSelector((state) => state.user);
 
-    const [dashboardData, setDashboardData] = useState([]);
+    const [dashboardData, setDashboardData] = useState(null);
     const [pieChartData, setPieChartData] = useState([]);
     const [barChartData, setBarChartData] = useState([]);
+    const [attendanceRecords, setAttendanceRecords] = useState([]);
 
     // prepare data for pie chart
     const prepareChartData = (data) => {
@@ -27,8 +33,9 @@ const UserDashboard = () => {
         const taskDistributionData = [
             { status: "Pending", count: taskDistribution?.Pending || 0 },
             { status: "In Progress", count: taskDistribution?.InProgress || 0 },
+            { status: "Awaiting Verification", count: taskDistribution?.AwaitingVerification || 0 },
             { status: "Completed", count: taskDistribution?.Completed || 0 },
-        ];
+        ].filter(item => item.count > 0);
 
         setPieChartData(taskDistributionData);
 
@@ -56,8 +63,19 @@ const UserDashboard = () => {
         }
     };
 
+    const getAttendanceData = async () => {
+        try {
+            // This endpoint defaults to fetching the last 30 days for the current user
+            const response = await axiosInstance.get("/attendance");
+            setAttendanceRecords(response.data);
+        } catch (error) {
+            console.log("Error fetching user attendance data: ", error);
+        }
+    };
+
     useEffect(() => {
         getDashboardData();
+        getAttendanceData();
 
         return () => {};
     }, []);
@@ -65,34 +83,69 @@ const UserDashboard = () => {
     return (
         <DashboardLayout activeMenu={"Dashboard"}>
             <div className="p-6 space-y-6">
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-6 shadow-lg text-white">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div>
+                {/* HERO SECTION */}
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg text-gray-900 relative overflow-hidden"
+                >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between relative z-10">
+                        {/* LEFT SIDE: Text */}
+                        <div className="flex-1">
                             <h2 className="text-2xl md:text-3xl font-bold">
                                 Welcome! {currentUser?.name}
                             </h2>
 
-                            <p className="text-blue-100 mt-1">
+                            <p className="text-gray-500 mt-1">
                                 {moment().format("dddd Do MMMM YYYY")}
                             </p>
+                            <p className="text-sm text-gray-600 mt-4 max-w-md">
+                                Stay focused on your assigned tasks and track your progress efficiently.
+                            </p>
                         </div>
-                    </div>
-                </div>
 
-                {dashboardData && (
+                        {/* RIGHT SIDE: Illustration */}
+                        <motion.img
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            src={UserDashboardIllustration}
+                            alt="Construction Workers Illustration"
+                            className="w-full max-w-[150px] md:max-w-[200px] h-auto mt-4 md:mt-0"
+                        />
+                    </div>
+                </motion.div>
+
+                {/* STATS */}
+                {dashboardData ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500 hover:shadow-lg transition"
+                        >
                             <h3 className="text-gray-500 text-sm font-medium">
-                                Total Tasks
+                                Overdue Tasks
                             </h3>
 
                             <p className="text-3xl font-bold text-gray-800 mt-2">
-                                {dashboardData?.charts?.taskDistribution?.All ||
+                                {dashboardData?.statistics?.overdueTasks ||
                                     0}
                             </p>
-                        </div>
+                        </motion.div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-yellow-500">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="bg-white p-6 rounded-xl shadow-md border-l-4 border-yellow-500 hover:shadow-lg transition"
+                        >
                             <h3 className="text-gray-500 text-sm font-medium">
                                 Pending Tasks
                             </h3>
@@ -101,20 +154,32 @@ const UserDashboard = () => {
                                 {dashboardData?.charts?.taskDistribution
                                     ?.Pending || 0}
                             </p>
-                        </div>
+                        </motion.div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="bg-white p-6 rounded-xl shadow-md border-l-4 border-orange-500 hover:shadow-lg transition"
+                        >
                             <h3 className="text-gray-500 text-sm font-medium">
-                                In Progress Tasks
+                                Awaiting Verification
                             </h3>
 
                             <p className="text-3xl font-bold text-gray-800 mt-2">
                                 {dashboardData?.charts?.taskDistribution
-                                    ?.InProgress || 0}
+                                    ?.AwaitingVerification || 0}
                             </p>
-                        </div>
+                        </motion.div>
 
-                        <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.4 }}
+                            className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 hover:shadow-lg transition"
+                        >
                             <h3 className="text-gray-500 text-sm font-medium">
                                 Completed Tasks
                             </h3>
@@ -123,39 +188,108 @@ const UserDashboard = () => {
                                 {dashboardData?.charts?.taskDistribution
                                     ?.Completed || 0}
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
+                ) : (
+                    <DashboardStatSkeleton />
                 )}
 
-                {/* Charts Section */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white p-6 rounded-xl">
+                {/* Charts Section - Now 3 columns */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Attendance Chart */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="bg-white p-6 rounded-xl border border-gray-200 shadow-md"
+                    >
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                            Attendance Summary (30 Days)
+                        </h3>
+
+                        <div className="h-64">
+                            {dashboardData ? (
+                                <AttendanceSummaryChart records={attendanceRecords} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center animate-pulse">
+                                    <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+
+                    {/* Task Distribution Chart */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="bg-white p-6 rounded-xl border border-gray-200 shadow-md"
+                    >
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">
                             Task Distribution
                         </h3>
 
                         <div className="h-64">
-                            <CustomPieChart
-                                data={pieChartData}
-                                label="Total Balance"
-                                colors={COLORS}
-                            />
+                            {dashboardData ? (
+                                <CustomPieChart
+                                    data={pieChartData}
+                                    label="Total Balance"
+                                    colors={COLORS}
+                                />
+                            ) : (
+                                <div className="h-full flex items-center justify-center animate-pulse">
+                                    <div className="w-32 h-32 rounded-full bg-gray-200"></div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="bg-white p-6 rounded-xl">
+                    {/* Task Priority Chart */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        className="bg-white p-6 rounded-xl border border-gray-200 shadow-md"
+                    >
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">
                             Task Priority Levels
                         </h3>
 
                         <div className="h-64">
-                            <CustomBarChart data={barChartData} />
+                            {dashboardData ? (
+                                <CustomBarChart data={barChartData} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center animate-pulse">
+                                    <div className="w-full h-full bg-gray-200 rounded-lg"></div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
 
                 {/* Recent Task Section */}
-                <RecentTasks tasks={dashboardData?.recentTasks} />
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: 0.4 }}
+                >
+                    {dashboardData ? (
+                        <RecentTasks tasks={dashboardData?.recentTasks} />
+                    ) : (
+                        <div className="bg-white mt-6 border border-gray-200 rounded-xl shadow-lg p-6 animate-pulse">
+                            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                            <div className="space-y-3">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="h-8 bg-gray-100 rounded"></div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </motion.div>
             </div>
         </DashboardLayout>
     );

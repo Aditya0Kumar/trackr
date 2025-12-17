@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Rocket, ArrowRight, Play, Github } from "lucide-react";
+import { Wrench, ArrowRight } from "lucide-react"; // Removed Play
 
 const HeroSection = () => {
     const [mouse, setMouse] = useState({ x: 0, y: 0 });
@@ -33,9 +33,9 @@ const HeroSection = () => {
                     }}
                     className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-6 py-3 mb-8"
                 >
-                    <Rocket className="w-4 h-4 text-blue-600" />
+                    <Wrench className="w-4 h-4 text-blue-600" />
                     <span className="text-sm font-medium text-gray-700">
-                        Streamline Your Workflow with Project Flow
+                        Streamline Site Management with Trackr
                     </span>
                 </motion.div>
 
@@ -51,10 +51,10 @@ const HeroSection = () => {
                     }}
                     className="text-4xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
                 >
-                    Project Management
+                    Construction Progress
                     <br />
                     <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Made Simple
+                        Tracked in Real-Time
                     </span>
                 </motion.h1>
 
@@ -70,9 +70,8 @@ const HeroSection = () => {
                     }}
                     className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed"
                 >
-                    Collaborate, track, and deliver projects faster with our
-                    intuitive project management platform. Designed for teams
-                    who value efficiency and clarity.
+                    Assign tasks to site engineers, verify checklist completion,
+                    and monitor project milestones from foundation to finish.
                 </motion.p>
 
                 {/* CTA Buttons */}
@@ -85,20 +84,15 @@ const HeroSection = () => {
                             mouse.y * 15
                         }px)`,
                     }}
-                    className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+                    className="flex items-center justify-center mb-16"
                 >
                     <Link
                         to="/signup"
                         className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:shadow-2xl transition-all duration-300 flex items-center gap-3"
                     >
-                        Get Started Free
+                        Start Site Tracking
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
-
-                    <button className="group bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-4 rounded-2xl font-semibold text-lg border border-gray-200 hover:shadow-lg transition-all duration-300 flex items-center gap-3">
-                        <Play className="w-5 h-5" />
-                        Watch Demo
-                    </button>
                 </motion.div>
 
                 {/* Stats */}
@@ -109,9 +103,9 @@ const HeroSection = () => {
                     className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto"
                 >
                     {[
-                        { number: "10K+", label: "Projects Managed" },
-                        { number: "50K+", label: "Tasks Completed" },
-                        { number: "99%", label: "Satisfaction Rate" },
+                        { number: "100+", label: "Sites Managed" },
+                        { number: "50K+", label: "Tasks Verified" },
+                        { number: "99%", label: "On-Time Delivery" },
                     ].map((stat, index) => (
                         <motion.div
                             key={stat.label}

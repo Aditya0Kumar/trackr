@@ -1,25 +1,28 @@
 import React from "react";
+import UserAvatar from "./UserAvatar";
 
 const AvatarGroup = ({ avatars = [], maxVisible = 3 }) => {
     return (
         <div className="flex items-center">
-            {avatars.slice(0, maxVisible).map((avatar, index) => (
-                <img
+            {avatars.slice(0, maxVisible).map((avatarUrl, index) => (
+                <div
                     key={index}
-                    src={avatar}
-                    alt={`Avatar-${index + 1}`}
-                    className="w-9 h-9 rounded-full border-2 border-gray-900 shadow-sm 
-                     -ml-3 first:ml-0 object-cover"
-                />
+                    className="w-9 h-9 rounded-full border-2 border-white shadow-md -ml-3 first:ml-0"
+                >
+                    <UserAvatar
+                        imageUrl={avatarUrl}
+                        size="w-full h-full"
+                    />
+                </div>
             ))}
 
             {avatars.length > maxVisible && (
                 <div
                     className="w-9 h-9 flex items-center justify-center 
-                     bg-gray-800/70 backdrop-blur-md 
-                     text-[11px] text-gray-200 
+                     bg-gray-200 
+                     text-[11px] text-gray-700 
                      font-medium rounded-full 
-                     border border-gray-700 -ml-3 shadow-sm"
+                     border border-gray-300 -ml-3 shadow-sm"
                 >
                     +{avatars.length - maxVisible}
                 </div>

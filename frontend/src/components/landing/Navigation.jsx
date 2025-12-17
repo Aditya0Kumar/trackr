@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Menu, X, Rocket } from "lucide-react";
+import { Menu, X, HardHat } from "lucide-react"; // Changed Rocket to HardHat
 
 const Navigation = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,10 +17,10 @@ const Navigation = () => {
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2">
                         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                            <Rocket className="w-6 h-6 text-white" />
+                            <HardHat className="w-6 h-6 text-white" />
                         </div>
                         <span className="text-xl font-bold text-gray-900">
-                            Project Flow
+                            Trackr
                         </span>
                     </Link>
 
@@ -39,7 +39,7 @@ const Navigation = () => {
                             How It Works
                         </a>
                         <a
-                            href="#pricing"
+                            href="#cta"
                             className="text-gray-700 hover:text-blue-600 transition-colors"
                         >
                             Pricing
@@ -47,13 +47,13 @@ const Navigation = () => {
                         <div className="flex items-center gap-4">
                             <Link
                                 to="/login"
-                                className="text-gray-700 hover:text-blue-600 transition-colors"
+                                className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 to="/signup"
-                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-300"
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl hover:shadow-lg transition-all duration-300 font-semibold"
                             >
                                 Get Started
                             </Link>
@@ -62,7 +62,7 @@ const Navigation = () => {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden"
+                        className="md:hidden p-2 rounded-md hover:bg-gray-100 transition"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
@@ -84,32 +84,32 @@ const Navigation = () => {
                         <div className="flex flex-col gap-4">
                             <a
                                 href="#features"
-                                className="text-gray-700 hover:text-blue-600 transition-colors"
+                                className="text-gray-700 hover:text-blue-600 transition-colors py-1"
                             >
                                 Features
                             </a>
                             <a
                                 href="#how-it-works"
-                                className="text-gray-700 hover:text-blue-600 transition-colors"
+                                className="text-gray-700 hover:text-blue-600 transition-colors py-1"
                             >
                                 How It Works
                             </a>
                             <a
-                                href="#pricing"
-                                className="text-gray-700 hover:text-blue-600 transition-colors"
+                                href="#cta"
+                                className="text-gray-700 hover:text-blue-600 transition-colors py-1"
                             >
                                 Pricing
                             </a>
                             <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
                                 <Link
                                     to="/login"
-                                    className="text-gray-700 hover:text-blue-600 transition-colors py-2"
+                                    className="text-gray-700 hover:text-blue-600 transition-colors py-2 font-medium"
                                 >
                                     Sign In
                                 </Link>
                                 <Link
                                     to="/signup"
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl text-center hover:shadow-lg transition-all duration-300"
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-xl text-center hover:shadow-lg transition-all duration-300 font-semibold"
                                 >
                                     Get Started
                                 </Link>

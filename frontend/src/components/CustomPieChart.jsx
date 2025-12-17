@@ -12,7 +12,7 @@ import CustomLegend from "./CustomLegend";
 
 const CustomPieChart = ({ data, colors }) => {
     return (
-        <div className="bg-gray-900/40 backdrop-blur-xl border border-gray-800 rounded-xl p-4 shadow-md">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
             <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                     <Pie
@@ -29,8 +29,8 @@ const CustomPieChart = ({ data, colors }) => {
                             <Cell
                                 key={index}
                                 fill={colors[index % colors.length]}
-                                stroke="rgba(0,0,0,0.3)"
-                                strokeWidth={1}
+                                stroke="#ffffff"
+                                strokeWidth={2}
                             />
                         ))}
                     </Pie>

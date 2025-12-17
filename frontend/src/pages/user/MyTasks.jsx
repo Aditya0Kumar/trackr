@@ -3,9 +3,9 @@ import DashboardLayout from "../../components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axioInstance";
 import TaskStatusTabs from "../../components/TaskStatusTabs";
-import { FaFileLines } from "react-icons/fa6";
 import TaskCard from "../../components/TaskCard";
-import toast from "react-hot-toast";
+import TaskFilterSort from "../../components/TaskFilterSort";
+import { Search } from "lucide-react";
 
 const MyTask = () => {
     const [allTasks, setAllTasks] = useState([]);
@@ -13,11 +13,13 @@ const MyTask = () => {
         { label: "All", count: 0 },
         { label: "Pending", count: 0 },
         { label: "In Progress", count: 0 },
+        { label: "Awaiting Verification", count: 0 },
         { label: "Completed", count: 0 },
     ]);
     const [filterStatus, setFilterStatus] = useState("All");
-
-    // console.log(tabs)
+    const [filter, setFilter] = useState({ priority: "All" });
+    const [sort, setSort] = useState("createdAtDesc");
+    const [searchTerm, setSearchTerm] = useState(""); // New state for search
 
     const navigate = useNavigate();
 
@@ -26,6 +28,9 @@ const MyTask = () => {
             const response = await axiosInstance.get("/tasks", {
                 params: {
                     status: filterStatus === "All" ? "" : filterStatus,
+                    priority: filter.priority,
+                    sort: sort,
+                    search: searchTerm, // Pass search term
                 },
             });
 
@@ -45,6 +50,10 @@ const MyTask = () => {
                     count: statusSummary.inProgressTasks || 0,
                 },
                 {
+                    label: "Awaiting Verification",
+                    count: statusSummary.awaitingVerificationTasks || 0,
+                },
+                {
                     label: "Completed",
                     count: statusSummary.completedTasks || 0,
                 },
@@ -55,30 +64,50 @@ const MyTask = () => {
     };
 
     const handleClick = (taskId) => {
-        navigate(`/user/task-details/${taskId}`);
+        // User now navigates to the shared TaskDetails page
+        navigate(`/task-details/${taskId}`);
     };
 
     useEffect(() => {
-        getAllTasks(filterStatus);
-
-        return () => {};
-    }, [filterStatus]);
+        getAllTasks();
+    }, [filterStatus, filter.priority, sort, searchTerm]); // Re-fetch when search term changes
 
     return (
         <DashboardLayout activeMenu={"My Tasks"}>
             <div className="my-6 px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                     <div className="flex items-center justify-between gap-4 w-full md:w-auto ">
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
                             My Tasks
                         </h2>
                     </div>
+                </div>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                        <TaskStatusTabs
-                            tabs={tabs}
-                            activeTab={filterStatus}
-                            setActiveTab={setFilterStatus}
+                {/* FILTER/SORT & STATUS TABS */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+                    <TaskStatusTabs
+                        tabs={tabs}
+                        activeTab={filterStatus}
+                        setActiveTab={setFilterStatus}
+                    />
+                    
+                    {/* Search Input and Filter/Sort */}
+                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                        <div className="relative flex-1 min-w-[200px]">
+                            <input
+                                type="text"
+                                placeholder="Search tasks by title or description..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2.5 pl-10 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        </div>
+                        <TaskFilterSort
+                            filter={filter}
+                            setFilter={setFilter}
+                            sort={sort}
+                            setSort={setSort}
                         />
                     </div>
                 </div>
@@ -107,10 +136,9 @@ const MyTask = () => {
                             />
                         ))
                     ) : (
-                        <div className="col-span-full text-center py-10">
+                        <div className="col-span-full text-center py-10 bg-white rounded-xl border border-gray-200 shadow-md">
                             <p className="text-gray-500">
-                                No tasks found. Create a new task to get
-                                started.
+                                No tasks found matching the current filters.
                             </p>
                         </div>
                     )}

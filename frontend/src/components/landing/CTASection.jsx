@@ -10,6 +10,7 @@ import {
     MessageCircle,
     Mail,
     PhoneCall,
+    HardHat, // New icon
 } from "lucide-react";
 
 const CTASection = () => {
@@ -29,38 +30,38 @@ const CTASection = () => {
     const testimonials = [
         {
             name: "Sarah Chen",
-            role: "Product Manager at TechCorp",
+            role: "Site Manager at BuildCo",
             content:
-                "Project Flow transformed how our team collaborates. We've seen a 40% increase in productivity since switching.",
+                "Trackr transformed how our site engineers report progress. We've seen a 40% increase in verification speed since switching.",
             rating: 5,
         },
         {
             name: "Marcus Johnson",
-            role: "Startup Founder",
+            role: "Construction Director",
             content:
-                "The intuitive interface and powerful features helped us scale from 5 to 50 team members seamlessly.",
+                "The intuitive interface and mandatory verification features helped us maintain quality across 5 major projects seamlessly.",
             rating: 5,
         },
         {
             name: "Elena Rodriguez",
-            role: "Design Team Lead",
+            role: "Project Lead Engineer",
             content:
-                "Finally, a project management tool that actually understands how creative teams work. Game changer!",
+                "Finally, a project management tool that actually understands the need for strict site progress tracking. Game changer!",
             rating: 5,
         },
     ];
 
     const plans = [
         {
-            name: "Starter",
+            name: "Site Starter",
             price: "Free",
             period: "forever",
             description:
-                "Perfect for individuals and small teams getting started",
+                "Perfect for individual site managers and small teams getting started",
             features: [
                 "Up to 5 team members",
                 "Basic task management",
-                "1GB storage",
+                "1GB storage for site photos",
                 "Email support",
             ],
             cta: "Get Started",
@@ -68,16 +69,16 @@ const CTASection = () => {
             color: "from-gray-500 to-gray-700",
         },
         {
-            name: "Professional",
+            name: "Project Professional",
             price: "$12",
             period: "per month",
-            description: "Everything you need for growing teams",
+            description: "Everything you need for growing construction teams",
             features: [
                 "Up to 50 team members",
-                "Advanced analytics",
+                "Advanced progress analytics",
                 "10GB storage",
                 "Priority support",
-                "Custom workflows",
+                "Custom verification workflows",
                 "Time tracking",
             ],
             cta: "Start Free Trial",
@@ -85,16 +86,16 @@ const CTASection = () => {
             color: "from-blue-500 to-purple-600",
         },
         {
-            name: "Enterprise",
+            name: "Enterprise Build",
             price: "Custom",
             period: "tailored",
-            description: "For large organizations with complex needs",
+            description: "For large organizations with complex site needs",
             features: [
                 "Unlimited team members",
-                "Advanced security",
+                "Advanced security & compliance",
                 "100GB+ storage",
-                "Dedicated manager",
-                "Custom integrations",
+                "Dedicated project manager",
+                "Custom integrations (BIM/ERP)",
                 "SLA guarantee",
             ],
             cta: "Contact Sales",
@@ -127,23 +128,21 @@ const CTASection = () => {
                         }}
                         className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 px-6 py-3 rounded-full text-sm font-medium mb-6"
                     >
-                        <Award className="w-4 h-4" />
-                        Join 10,000+ Teams Worldwide
+                        <HardHat className="w-4 h-4" />
+                        Join 10,000+ Construction Teams
                     </motion.div>
 
                     <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
                         Ready to Transform Your
                         <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
                             {" "}
-                            Workflow?
+                            Site Progress Tracking?
                         </span>
                     </h2>
 
                     <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-12">
                         Start your free trial today and experience the
-                        difference. No credit card required. Join thousands of
-                        teams who have already streamlined their project
-                        management.
+                        difference in construction management efficiency. No credit card required.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
@@ -153,14 +152,6 @@ const CTASection = () => {
                         >
                             Start Free Trial
                             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </Link>
-
-                        <Link
-                            to="/login"
-                            className="group bg-transparent border-2 border-white/30 text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/10 transition-all duration-300 flex items-center gap-3"
-                        >
-                            <MessageCircle className="w-5 h-5" />
-                            Book a Demo
                         </Link>
                     </div>
 
@@ -267,11 +258,7 @@ const CTASection = () => {
                                 </ul>
 
                                 <Link
-                                    to={
-                                        plan.name === "Enterprise"
-                                            ? "/contact"
-                                            : "/signup"
-                                    }
+                                    to="/signup"
                                     className={`w-full block text-center py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
                                         plan.popular
                                             ? "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-2xl hover:scale-105"
@@ -294,7 +281,7 @@ const CTASection = () => {
                     className="mb-20"
                 >
                     <h3 className="text-3xl font-bold text-center mb-12">
-                        Loved by Teams Worldwide
+                        Trusted by Leading Construction Firms
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -350,10 +337,10 @@ const CTASection = () => {
                 >
                     <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 max-w-2xl mx-auto">
                         <h3 className="text-2xl font-bold mb-4">
-                            Stay Updated
+                            Stay Updated on Construction Tech
                         </h3>
                         <p className="text-gray-300 mb-6">
-                            Get the latest product updates and tips delivered to
+                            Get the latest product updates and site management tips delivered to
                             your inbox.
                         </p>
 

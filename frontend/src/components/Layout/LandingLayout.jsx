@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import Navigation from '../Layout/N'
+import Navigation from '../landing/Navigation' // Corrected path
 
 const LandingLayout = ({ children }) => {
   return (
@@ -19,4 +19,4 @@ const LandingLayout = ({ children }) => {
   )
 }
 
-export default Navigation
+export default LandingLayout;

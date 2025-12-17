@@ -1,6 +1,4 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/auth/Login";
-import SignUp from "./pages/auth/SignUp";
 import Dashboard from "./pages/admin/Dashboard";
 import ManageTasks from "./pages/admin/ManageTasks";
 import ManageUsers from "./pages/admin/ManageUsers";
@@ -9,18 +7,34 @@ import PrivateRoute from "./routes/PrivateRoute";
 import UserDashboard from "./pages/user/UserDashboard";
 import TaskDetails from "./pages/user/TaskDetails";
 import MyTasks from "./pages/user/MyTasks";
+import Profile from "./pages/Profile";
+import ManageAttendance from "./pages/admin/ManageAttendance"; // Import Admin Attendance
+import MyAttendance from "./pages/user/MyAttendance"; // Import User Attendance
+import Landing from "./pages/Landing"; // Import Landing Page
 import { useSelector } from "react-redux";
 
 import toast, { Toaster } from "react-hot-toast";
+import AuthPage from "./pages/auth/AuthPage";
 
 const App = () => {
     return (
         <div>
             <BrowserRouter>
                 <Routes>
-                    {/* <Route path="/l" element={<Landing />} /> */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<SignUp />} />
+                    {/* Public Routes */}
+                    <Route path="/" element={<Root />} />
+                    <Route path="/login" element={<AuthPage />} />
+                    <Route path="/signup" element={<AuthPage />} />
+
+                    {/* Shared Private Routes */}
+                    <Route element={<PrivateRoute allowedRoles={["admin", "user"]} />}>
+                        <Route path="/profile" element={<Profile />} />
+                        {/* Task Details is now shared */}
+                        <Route
+                            path="/task-details/:id"
+                            element={<TaskDetails />}
+                        />
+                    </Route>
 
                     {/* Admin Routes */}
                     <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
@@ -34,6 +48,10 @@ const App = () => {
                             path="/admin/create-task"
                             element={<CreateTask />}
                         />
+                        <Route
+                            path="/admin/attendance"
+                            element={<ManageAttendance />}
+                        />
                     </Route>
 
                     {/* User Routes */}
@@ -44,13 +62,10 @@ const App = () => {
                         />
                         <Route path="/user/tasks" element={<MyTasks />} />
                         <Route
-                            path="/user/task-details/:id"
-                            element={<TaskDetails />}
+                            path="/user/attendance"
+                            element={<MyAttendance />}
                         />
                     </Route>
-
-                    {/* Default Route */}
-                    <Route path="/" element={<Root />} />
                 </Routes>
             </BrowserRouter>
 
@@ -65,9 +80,10 @@ const Root = () => {
     const { currentUser } = useSelector((state) => state.user);
 
     if (!currentUser) {
-        return <Navigate to={"/login"} />;
+        return <Landing />; // Show landing page if not logged in
     }
 
+    // Redirect to dashboard if logged in
     return currentUser.role === "admin" ? (
         <Navigate to={"/admin/dashboard"} />
     ) : (

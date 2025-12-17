@@ -25,7 +25,7 @@ const CreateTask = () => {
         priority: "Low",
         dueDate: null,
         assignedTo: [],
-        todoChecklist: [],
+        todoChecklist: [], // Array of strings (texts)
         attachments: [],
     });
 
@@ -52,17 +52,14 @@ const CreateTask = () => {
     const createTask = async () => {
         try {
             setLoading(true);
-            const todolist = (taskData.todoChecklist || []).map((t) => ({
-                text: t,
-                completed: false,
-            }));
-
+            
+            // Send array of strings (texts)
             await axiosInstance.post("/tasks/create", {
                 ...taskData,
                 dueDate: taskData.dueDate
                     ? new Date(taskData.dueDate).toISOString()
                     : null,
-                todoChecklist: todolist,
+                todoChecklist: taskData.todoChecklist, 
             });
 
             toast.success("Task created successfully!");
@@ -80,18 +77,14 @@ const CreateTask = () => {
     const updateTask = async () => {
         try {
             setLoading(true);
-            const todolist = (taskData.todoChecklist || []).map((text) => {
-                const prev = currentTask?.todoChecklist || [];
-                const matched = prev.find((p) => p.text === text);
-                return { text, completed: matched ? matched.completed : false };
-            });
-
+            
+            // Send array of strings (texts)
             await axiosInstance.put(`/tasks/${taskId}`, {
                 ...taskData,
                 dueDate: taskData.dueDate
                     ? new Date(taskData.dueDate).toISOString()
                     : null,
-                todoChecklist: todolist,
+                todoChecklist: taskData.todoChecklist,
             });
 
             toast.success("Task updated successfully!");
@@ -135,6 +128,7 @@ const CreateTask = () => {
                         ? new Date(res.data.dueDate)
                         : null,
                     assignedTo: res.data.assignedTo?.map((u) => u._id) || [],
+                    // Extract only the text for the form input
                     todoChecklist:
                         res.data.todoChecklist?.map((t) => t.text) || [],
                     attachments: res.data.attachments || [],
@@ -146,17 +140,18 @@ const CreateTask = () => {
         }
     };
 
-    // delete
+    // delete (now archive)
     const deleteTask = async () => {
         try {
             setLoading(true);
-            await axiosInstance.delete(`/tasks/${taskId}`);
+            // Use DELETE method, but backend performs soft delete (archiving)
+            await axiosInstance.delete(`/tasks/${taskId}`); 
             setOpenDeleteAlert(false);
-            toast.success("Task deleted");
+            toast.success("Task archived successfully!");
             navigate("/admin/tasks");
         } catch (err) {
             console.error("deleteTask:", err);
-            toast.error("Error deleting task");
+            toast.error("Error archiving task");
         } finally {
             setLoading(false);
         }
@@ -174,14 +169,14 @@ const CreateTask = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45 }}
-                    className="bg-gray-900/70 border border-gray-800 rounded-xl p-6 shadow-lg text-white"
+                    className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg text-gray-900"
                 >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                         <div>
                             <h2 className="text-2xl font-semibold">
                                 {taskId ? "Update Task" : "Create New Task"}
                             </h2>
-                            <p className="text-sm text-gray-400 mt-1">
+                            <p className="text-sm text-gray-500 mt-1">
                                 {taskId
                                     ? "Modify the task and update."
                                     : "Fill details to create a new task."}
@@ -193,15 +188,15 @@ const CreateTask = () => {
                                 <button
                                     onClick={() => setOpenDeleteAlert(true)}
                                     type="button"
-                                    className="flex items-center gap-2 text-red-400 hover:text-red-500"
+                                    className="flex items-center gap-2 text-red-600 hover:text-red-700 p-2 rounded-md hover:bg-red-50 transition"
                                 >
-                                    <MdDelete className="text-lg" /> Delete
+                                    <MdDelete className="text-lg" /> Archive
                                 </button>
                             )}
 
                             <button
                                 onClick={() => navigate("/admin/tasks")}
-                                className="px-3 py-1.5 rounded-md bg-gray-800 border border-gray-700 text-white hover:bg-gray-800/90"
+                                className="px-3 py-1.5 rounded-md bg-gray-100 border border-gray-300 text-gray-700 hover:bg-gray-200"
                                 type="button"
                             >
                                 Back to Tasks
@@ -210,7 +205,7 @@ const CreateTask = () => {
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-3 bg-red-900/30 text-red-300 rounded-md border border-red-800">
+                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md border border-red-300">
                             {error}
                         </div>
                     )}
@@ -218,7 +213,7 @@ const CreateTask = () => {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Title */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Title <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -227,13 +222,13 @@ const CreateTask = () => {
                                     handleValueChange("title", e.target.value)
                                 }
                                 placeholder="e.g. Fix slab cracks at sector 5"
-                                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
 
                         {/* Description */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Description
                             </label>
                             <textarea
@@ -246,14 +241,14 @@ const CreateTask = () => {
                                 }
                                 rows={4}
                                 placeholder="Add more details for the site engineer..."
-                                className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
 
                         {/* Priority & DueDate */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Priority
                                 </label>
                                 <select
@@ -264,7 +259,7 @@ const CreateTask = () => {
                                             e.target.value
                                         )
                                     }
-                                    className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 >
                                     <option value="Low">Low</option>
                                     <option value="Medium">Medium</option>
@@ -273,7 +268,7 @@ const CreateTask = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Due Date
                                 </label>
                                 <DatePicker
@@ -283,7 +278,7 @@ const CreateTask = () => {
                                     }
                                     minDate={new Date()}
                                     placeholderText="Select due date"
-                                    className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     dateFormat="yyyy-MM-dd"
                                 />
                             </div>
@@ -291,26 +286,25 @@ const CreateTask = () => {
 
                         {/* Assign To */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Assign To
                             </label>
-                            <div className="bg-gray-900/50 border border-gray-800 rounded-md p-3">
+                            <div className="bg-gray-50 border border-gray-300 rounded-md p-3">
                                 <SelectedUsers
                                     selectedUser={taskData.assignedTo}
                                     setSelectedUser={(ids) =>
                                         handleValueChange("assignedTo", ids)
                                     }
-                                    dark
                                 />
                             </div>
                         </div>
 
                         {/* Todo checklist */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 TODO Checklist
                             </label>
-                            <div className="bg-gray-900/50 border border-gray-800 rounded-md p-3">
+                            <div className="bg-gray-50 border border-gray-300 rounded-md p-3">
                                 <TodoListInput
                                     todoList={taskData.todoChecklist}
                                     setTodoList={(list) =>
@@ -322,10 +316,10 @@ const CreateTask = () => {
 
                         {/* Attachments */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Attachments
                             </label>
-                            <div className="bg-gray-900/50 border border-gray-800 rounded-md p-3">
+                            <div className="bg-gray-50 border border-gray-300 rounded-md p-3">
                                 <AddAttachmentsInput
                                     attachments={taskData.attachments}
                                     setAttachments={(arr) =>
@@ -343,7 +337,7 @@ const CreateTask = () => {
                                     clearData();
                                     navigate("/admin/tasks");
                                 }}
-                                className="px-4 py-2 rounded-md bg-gray-800 border border-gray-700 text-gray-200 hover:bg-gray-800/90"
+                                className="px-4 py-2 rounded-md bg-gray-200 border border-gray-300 text-gray-700 hover:bg-gray-300"
                             >
                                 Cancel
                             </button>
@@ -354,8 +348,8 @@ const CreateTask = () => {
                                 disabled={loading}
                                 className={`px-4 py-2 rounded-md text-white font-semibold ${
                                     loading
-                                        ? "bg-gray-700 cursor-not-allowed"
-                                        : "bg-green-600 hover:bg-green-700"
+                                        ? "bg-indigo-400 cursor-not-allowed"
+                                        : "bg-indigo-600 hover:bg-indigo-700"
                                 }`}
                             >
                                 {loading
@@ -374,11 +368,11 @@ const CreateTask = () => {
             <Modal
                 isOpen={openDeleteAlert}
                 onClose={() => setOpenDeleteAlert(false)}
-                title={"Delete Task"}
+                title={"Archive Task"}
             >
-                <div className="bg-black/40 backdrop-blur-lg p-4 rounded-md">
+                <div className="bg-white p-4 rounded-md">
                     <DeleteAlert
-                        content="Are you sure you want to delete this task?"
+                        content="Are you sure you want to archive this task? It will be hidden from the main task list."
                         onDelete={() => deleteTask()}
                     />
                 </div>

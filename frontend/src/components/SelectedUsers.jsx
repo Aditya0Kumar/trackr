@@ -48,12 +48,12 @@ const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
             {/* Button / Avatar list */}
             {!selectedUserAvatars.length ? (
                 <button
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 
-                     text-gray-200 rounded-md shadow-sm hover:bg-gray-700 transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 
+                     text-gray-700 rounded-md shadow-sm hover:bg-gray-200 transition"
                     onClick={() => setIsModalOpen(true)}
                     type="button"
                 >
-                    <FaUsers className="text-lg" />
+                    <FaUsers className="text-lg text-indigo-500" />
                     Add Members
                 </button>
             ) : (
@@ -76,20 +76,20 @@ const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
                         <div
                             key={user._id}
                             className="flex items-center gap-4 p-3 
-                         bg-gray-900/60 border border-gray-800 rounded-lg 
-                         hover:bg-gray-800 transition"
+                         bg-gray-50 border border-gray-200 rounded-lg 
+                         hover:bg-gray-100 transition"
                         >
                             <img
                                 src={user.profileImageUrl}
                                 alt={user.name}
-                                className="w-10 h-10 rounded-full border border-gray-700 object-cover"
+                                className="w-10 h-10 rounded-full border border-gray-300 object-cover"
                             />
 
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-200">
+                                <p className="text-sm font-medium text-gray-800">
                                     {user.name}
                                 </p>
-                                <p className="text-xs text-gray-400">
+                                <p className="text-xs text-gray-500">
                                     {user.email}
                                 </p>
                             </div>
@@ -98,7 +98,7 @@ const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
                                 type="checkbox"
                                 checked={tempSelectedUser.includes(user._id)}
                                 onChange={() => toggleUserSelection(user._id)}
-                                className="w-4 h-4 accent-green-500 cursor-pointer"
+                                className="w-4 h-4 accent-indigo-500 cursor-pointer"
                             />
                         </div>
                     ))}
@@ -107,16 +107,16 @@ const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
                 {/* FOOTER */}
                 <div className="flex justify-end gap-4 pt-4">
                     <button
-                        className="px-4 py-2 bg-gray-800 border border-gray-700 
-                       text-gray-300 rounded-md hover:bg-gray-700 transition"
+                        className="px-4 py-2 bg-gray-200 border border-gray-300 
+                       text-gray-700 rounded-md hover:bg-gray-300 transition"
                         onClick={() => setIsModalOpen(false)}
                     >
                         Cancel
                     </button>
 
                     <button
-                        className="px-5 py-2 bg-green-600 hover:bg-green-700 
-                       text-white rounded-md transition"
+                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 
+                       text-white rounded-md transition shadow-md"
                         onClick={handleAssign}
                     >
                         Done
