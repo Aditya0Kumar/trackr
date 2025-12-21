@@ -19,15 +19,15 @@ const AttendanceFormRow = ({ user, attendanceStatus, setAttendanceStatus }) => {
 
     return (
         <div className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition">
-            <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-4 flex-1 min-w-0">
                 <UserAvatar imageUrl={user.profileImageUrl} size="w-10 h-10" />
-                <div>
-                    <p className="text-sm font-medium text-gray-800">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-800 truncate">{user.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-shrink-0">
                 {statusOptions.map(option => (
                     <button
                         key={option.value}

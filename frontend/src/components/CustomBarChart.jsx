@@ -14,11 +14,11 @@ const CustomBarChart = ({ data }) => {
     const getBarColor = (entry) => {
         switch (entry?.priority) {
             case "Low":
-                return "#4CAF50"; // Green
+                return "#4CAF50"; // Green (Standardized Low)
             case "Medium":
-                return "#FFB300"; // Deep Yellow
+                return "#FFB300"; // Amber (Standardized Medium)
             case "High":
-                return "#F44336"; // Red
+                return "#F44336"; // Red (Standardized High)
             default:
                 return "#999";
         }
@@ -48,8 +48,8 @@ const CustomBarChart = ({ data }) => {
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 mt-6 shadow-md">
-            <ResponsiveContainer width="100%" height={300}>
+        <div className="w-full h-full">
+            <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data}>
                     <CartesianGrid stroke="rgba(0,0,0,0.1)" strokeDasharray="3 3" />
 

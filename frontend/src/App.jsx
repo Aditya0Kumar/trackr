@@ -11,6 +11,8 @@ import Profile from "./pages/Profile";
 import ManageAttendance from "./pages/admin/ManageAttendance"; // Import Admin Attendance
 import MyAttendance from "./pages/user/MyAttendance"; // Import User Attendance
 import Landing from "./pages/Landing"; // Import Landing Page
+import ForgotPassword from "./pages/auth/ForgotPassword"; // Import ForgotPassword
+import ResetPassword from "./pages/auth/ResetPassword"; // Import ResetPassword
 import { useSelector } from "react-redux";
 
 import toast, { Toaster } from "react-hot-toast";
@@ -23,8 +25,10 @@ const App = () => {
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Root />} />
-                    <Route path="/login" element={<AuthPage />} />
-                    <Route path="/signup" element={<AuthPage />} />
+                    <Route path="/login" element={<AuthRedirect />} />
+                    <Route path="/signup" element={<AuthRedirect />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
 
                     {/* Shared Private Routes */}
                     <Route element={<PrivateRoute allowedRoles={["admin", "user"]} />}>
@@ -76,17 +80,27 @@ const App = () => {
 
 export default App;
 
+// Component to handle redirection from /login and /signup if already authenticated
+const AuthRedirect = () => {
+    const { currentUser } = useSelector((state) => state.user);
+
+    if (currentUser) {
+        const dashboardPath = currentUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        return <Navigate to={dashboardPath} replace />;
+    }
+
+    return <AuthPage />;
+};
+
+
 const Root = () => {
     const { currentUser } = useSelector((state) => state.user);
 
+    // If not logged in, show the landing page
     if (!currentUser) {
-        return <Landing />; // Show landing page if not logged in
+        return <Landing />;
     }
 
-    // Redirect to dashboard if logged in
-    return currentUser.role === "admin" ? (
-        <Navigate to={"/admin/dashboard"} />
-    ) : (
-        <Navigate to={"/user/dashboard"} />
-    );
+    // If logged in, allow access to the landing page, but provide a clear path back to the dashboard.
+    return <Landing />;
 };

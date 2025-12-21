@@ -12,8 +12,8 @@ import UserDashboardIllustration from "../../assets/undraw_construction-workers_
 import AttendanceSummaryChart from "../../components/attendance/AttendanceSummaryChart";
 import DashboardStatSkeleton from "../../components/DashboardStatSkeleton";
 
-// Updated colors to include Awaiting Verification (Orange)
-const COLORS = ["#FF6384", "#36A2EB", "#F97316", "#FFCE56"]; // Red, Blue, Orange, Yellow (Note: Pie chart colors are arbitrary here, but we need 4 slots)
+// Standardized Status Colors: Red (Pending), Blue (In Progress), Orange (Awaiting Verification), Green (Completed)
+const STATUS_COLORS = ["#EF4444", "#3B82F6", "#F97316", "#22C55E"]; 
 
 const UserDashboard = () => {
     const navigate = useNavigate();
@@ -82,7 +82,7 @@ const UserDashboard = () => {
 
     return (
         <DashboardLayout activeMenu={"Dashboard"}>
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
                 {/* HERO SECTION */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -121,7 +121,7 @@ const UserDashboard = () => {
 
                 {/* STATS */}
                 {dashboardData ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -195,7 +195,7 @@ const UserDashboard = () => {
                 )}
 
                 {/* Charts Section - Now 3 columns */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {/* Attendance Chart */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -208,7 +208,7 @@ const UserDashboard = () => {
                             Attendance Summary (30 Days)
                         </h3>
 
-                        <div className="h-64">
+                        <div className="h-80">
                             {dashboardData ? (
                                 <AttendanceSummaryChart records={attendanceRecords} />
                             ) : (
@@ -231,12 +231,12 @@ const UserDashboard = () => {
                             Task Distribution
                         </h3>
 
-                        <div className="h-64">
+                        <div className="h-80">
                             {dashboardData ? (
                                 <CustomPieChart
                                     data={pieChartData}
                                     label="Total Balance"
-                                    colors={COLORS}
+                                    colors={STATUS_COLORS} // Use standardized colors
                                 />
                             ) : (
                                 <div className="h-full flex items-center justify-center animate-pulse">
@@ -258,7 +258,7 @@ const UserDashboard = () => {
                             Task Priority Levels
                         </h3>
 
-                        <div className="h-64">
+                        <div className="h-80">
                             {dashboardData ? (
                                 <CustomBarChart data={barChartData} />
                             ) : (

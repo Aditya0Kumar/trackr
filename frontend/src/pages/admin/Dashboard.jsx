@@ -11,8 +11,8 @@ import { motion } from "framer-motion";
 import DashboardIllustration from "../../assets/undraw_dashboard_p93p.svg";
 import DashboardStatSkeleton from "../../components/DashboardStatSkeleton";
 
-// Updated colors to include Awaiting Verification (Orange)
-const STATUS_COLORS = ["#EF4444", "#FACC15", "#F97316", "#22C55E"]; // Red, Yellow, Orange, Green
+// Standardized Status Colors: Red (Pending), Blue (In Progress), Orange (Awaiting Verification), Green (Completed)
+const STATUS_COLORS = ["#EF4444", "#3B82F6", "#F97316", "#22C55E"]; 
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
     return (
         <DashboardLayout activeMenu="Dashboard">
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6">
                 {/* HERO SECTION */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -149,7 +149,7 @@ const Dashboard = () => {
 
                 {/* STATS */}
                 {dashboardData ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -184,12 +184,12 @@ const Dashboard = () => {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.3 }}
-                            className="bg-white border border-yellow-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
+                            className="bg-white border border-blue-300 rounded-xl p-5 shadow-md hover:shadow-lg transition"
                         >
-                            <p className="text-yellow-600 text-sm font-medium">
+                            <p className="text-blue-600 text-sm font-medium">
                                 In Progress
                             </p>
-                            <p className="text-3xl font-bold text-yellow-700 mt-2">
+                            <p className="text-3xl font-bold text-blue-700 mt-2">
                                 {dashboardData?.charts?.taskDistribution
                                     ?.InProgress || 0}
                             </p>
@@ -243,7 +243,7 @@ const Dashboard = () => {
                         <h3 className="text-gray-900 font-semibold mb-4">
                             Task Distribution
                         </h3>
-                        <div className="h-64">
+                        <div className="h-80">
                             {dashboardData ? (
                                 <CustomPieChart
                                     data={pieChartData}
@@ -267,7 +267,7 @@ const Dashboard = () => {
                         <h3 className="text-gray-900 font-semibold mb-4">
                             Priority Levels
                         </h3>
-                        <div className="h-64">
+                        <div className="h-80">
                             {dashboardData ? (
                                 <CustomBarChart data={barChartData} />
                             ) : (

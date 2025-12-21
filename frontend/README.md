@@ -1,16 +1,60 @@
-# React + Vite
+# Trackr: Construction Project Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Trackr is a full-stack application designed to streamline construction site management, task assignment, and progress verification.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **Frontend:** React (Vite), Redux Toolkit, Tailwind CSS, Framer Motion
+*   **Backend:** Node.js (Express.js), MongoDB (Mongoose)
+*   **Authentication:** JWT, bcryptjs
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Installation
 
-## Expanding the ESLint configuration
+Navigate to both the `backend` and `frontend` directories and install dependencies:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# In backend/
+npm install
+
+# In frontend/
+npm install
+```
+
+### 2. Configuration (Sensitive Information)
+
+**Crucially, you must configure your environment variables.**
+
+Create a file named `.env` inside the `backend/` directory and populate it with your sensitive credentials. This file is ignored by Git to protect your secrets.
+
+**Required Backend Variables:**
+
+| Variable | Description | Example Value |
+| :--- | :--- | :--- |
+| `MONGO_URI` | Connection string for your MongoDB database. | `mongodb+srv://user:pass@cluster.xyz/trackr` |
+| `JWT_SECRET` | Secret key for signing JWTs. | `a_very_long_and_random_secret_key` |
+| `ADMIN_JOIN_CODE` | Secret code allowing a user to register as an admin. | `SITE_ADMIN_2024` |
+| `FRONT_END_URL` | URL of the frontend application. | `http://localhost:5173` |
+| `EMAIL_SERVICE_HOST` | SMTP host (e.g., `smtp.gmail.com`). | `smtp.gmail.com` |
+| `EMAIL_SERVICE_PORT` | SMTP port (e.g., `587`). | `587` |
+| `EMAIL_SERVICE_USER` | Email address used for sending password reset links. | `your_email@example.com` |
+| `EMAIL_SERVICE_PASS` | App password or key for the email service. | `your_app_password` |
+
+### 3. Running the Application
+
+Start the backend server:
+
+```bash
+# In backend/
+npm run dev
+```
+
+Start the frontend application:
+
+```bash
+# In frontend/
+npm run dev
+```
+
+The application should now be accessible at `http://localhost:5173`.

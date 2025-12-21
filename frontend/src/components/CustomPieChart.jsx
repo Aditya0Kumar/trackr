@@ -12,8 +12,8 @@ import CustomLegend from "./CustomLegend";
 
 const CustomPieChart = ({ data, colors }) => {
     return (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
-            <ResponsiveContainer width="100%" height={300}>
+        <div className="w-full h-full">
+            <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
                         data={data}

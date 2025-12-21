@@ -92,17 +92,7 @@ const SidebarContent = ({ activeMenu, isCollapsed }) => {
                 })}
             </nav>
 
-            {/* Logout Button (Hidden when collapsed, handled by menu item when collapsed) */}
-            {!isCollapsed && (
-                <div className="mt-4">
-                    <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium"
-                    >
-                        Sign out
-                    </button>
-                </div>
-            )}
+            {/* Logout Button (Removed redundant explicit sign out button) */}
         </div>
     );
 };

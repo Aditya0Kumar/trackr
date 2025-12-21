@@ -2,6 +2,8 @@ import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/error.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/email.js"; // Import email utility
+import crypto from "crypto"; // Node built-in module
 
 export const signup = async (req, res, next) => {
     const { name, email, password, profileImageUrl, adminJoinCode } = req.body;
@@ -152,6 +154,85 @@ export const signout = async (req, res, next) => {
         res.clearCookie("access_token")
             .status(200)
             .json("User has been loggedout successfully!");
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return next(errorHandler(400, "Email is required"));
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            // Send a generic success message even if the user doesn't exist to prevent email enumeration
+            return res.status(200).json({ message: "If a matching account was found, a password reset email has been sent." });
+        }
+
+        // Generate a secure, time-limited token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        const tokenExpiry = Date.now() + 3600000; // 1 hour expiry
+
+        // Store the token and expiry on the user object (requires updating the User model)
+        // For now, we will use JWT to generate a temporary token that contains the user ID
+        const jwtToken = jwt.sign({ id: user._id, reset: true }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        
+        const resetUrl = `${process.env.FRONT_END_URL}/reset-password/${jwtToken}`;
+
+        const emailContent = `
+            <h1>Password Reset Request</h1>
+            <p>You requested a password reset for your Trackr account.</p>
+            <p>Please click the link below to reset your password. This link is valid for 1 hour:</p>
+            <a href="${resetUrl}" style="background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
+            <p>If you did not request this, please ignore this email.</p>
+        `;
+
+        await sendEmail(user.email, "Trackr Password Reset Request", emailContent);
+
+        res.status(200).json({ message: "If a matching account was found, a password reset email has been sent." });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        if (!password) {
+            return next(errorHandler(400, "New password is required"));
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return next(errorHandler(400, "Invalid or expired reset token."));
+        }
+
+        if (!decoded.reset || !decoded.id) {
+            return next(errorHandler(400, "Invalid token payload."));
+        }
+
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return next(errorHandler(404, "User not found."));
+        }
+
+        // Update password
+        user.password = bcryptjs.hashSync(password, 10);
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successfully." });
+
     } catch (error) {
         next(error);
     }

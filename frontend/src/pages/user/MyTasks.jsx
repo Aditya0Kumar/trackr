@@ -92,8 +92,8 @@ const MyTask = () => {
                     />
                     
                     {/* Search Input and Filter/Sort */}
-                    <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                        <div className="relative flex-1 min-w-[200px]">
+                    <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <div className="relative flex-1 min-w-[200px] max-w-full sm:max-w-xs">
                             <input
                                 type="text"
                                 placeholder="Search tasks by title or description..."

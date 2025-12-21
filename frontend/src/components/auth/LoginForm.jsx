@@ -8,7 +8,7 @@ import {
     Mail,
     Lock,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom"; // Import Link
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axioInstance";
 import { useDispatch, useSelector } from "react-redux";
@@ -155,6 +155,16 @@ const LoginForm = ({ onSwitch }) => {
                                     <Eye size={16} />
                                 )}
                             </button>
+                        </div>
+                        
+                        {/* Forgot Password Link */}
+                        <div className="text-right pt-1">
+                            <Link
+                                to="/forgot-password"
+                                className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                            >
+                                Forgot Password?
+                            </Link>
                         </div>
                     </div>
 

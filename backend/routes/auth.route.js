@@ -6,6 +6,8 @@ import {
     updateUserProfile,
     uploadImage,
     userProfile,
+    forgotPassword,
+    resetPassword,
 } from "../controller/auth.controller.js";
 
 import { verifyToken } from "../utils/verifyUser.js";
@@ -24,5 +26,9 @@ router.put("/update-profile", verifyToken, updateUserProfile);
 router.post("/upload-image", upload.single("image"), uploadImage);
 
 router.post("/sign-out", signout);
+
+// Password Reset Routes
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 export default router;

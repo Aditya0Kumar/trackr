@@ -226,18 +226,18 @@ const FeaturesSection = () => {
                     viewport={{ once: true }}
                     className="text-center mt-16"
                 >
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-8 text-white relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 text-white relative overflow-hidden">
                         {/* Background Pattern */}
                         <div className="absolute inset-0 opacity-10">
                             <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
-                            <div className="absolute bottom-0 right-0 w-48 h-48 bg-white rounded-full translate-x-1/2 translate-y-1/2" />
+                            <div className="absolute bottom-0 right-0 w-48 h-48 bg-white rounded-full translate-x-1/2 -translate-y-1/2" />
                         </div>
 
                         <div className="relative z-10">
                             <h3 className="text-2xl sm:text-3xl font-bold mb-4">
                                 Ready to Transform Your Site Management?
                             </h3>
-                            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+                            <p className="text-indigo-100 mb-6 max-w-2xl mx-auto">
                                 Join thousands of construction teams who have already
                                 streamlined their project management with
                                 Trackr.
@@ -245,7 +245,7 @@ const FeaturesSection = () => {
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="bg-white text-blue-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
+                                className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300"
                             >
                                 Start Free Trial
                             </motion.button>
