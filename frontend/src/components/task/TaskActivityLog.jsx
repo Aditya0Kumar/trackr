@@ -45,7 +45,7 @@ const getActivityIcon = (action) => {
 const TaskActivityLog = ({ activityLog = [] }) => {
     if (!activityLog || activityLog.length === 0) {
         return (
-            <div className="text-center py-4 text-gray-500 bg-white rounded-xl border border-gray-200">
+            <div className="text-center py-6 md:py-8 text-gray-500 bg-white rounded-xl border border-gray-200">
                 No activity recorded yet.
             </div>
         );
@@ -55,9 +55,9 @@ const TaskActivityLog = ({ activityLog = [] }) => {
     const reversedLog = [...activityLog].reverse();
 
     return (
-        <div className="relative pl-6">
-            {/* Vertical Line */}
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200" />
+        <div className="relative pl-3 md:pl-4">
+            {/* Vertical Line - Hidden on mobile, visible on md+ */}
+            <div className="hidden md:block absolute left-0 top-0 bottom-0 w-0.5 bg-gray-200" />
 
             {reversedLog.map((item, index) => {
                 const { icon: Icon, color, bg } = getActivityIcon(item.action);
@@ -68,33 +68,49 @@ const TaskActivityLog = ({ activityLog = [] }) => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="relative mb-6"
+                        className="relative mb-4 md:mb-6 last:mb-0"
                     >
-                        {/* Timeline Dot */}
-                        <div className={`absolute -left-3 top-1 w-6 h-6 rounded-full flex items-center justify-center border-4 border-white ${bg}`}>
-                            <Icon className={`w-3 h-3 ${color}`} />
+                        {/* Timeline Dot - Responsive positioning */}
+                        <div className="absolute left-0 md:left-0 top-1.5 md:top-1 transform -translate-x-1/2 md:translate-x-0">
+                            <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center border-2 md:border-4 border-white ${bg} shadow-sm`}>
+                                <Icon className={`w-2.5 h-2.5 md:w-3 md:h-3 ${color}`} />
+                            </div>
                         </div>
 
-                        {/* Content Card */}
-                        <div className="ml-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-                            <div className="flex items-center justify-between mb-2">
+                        {/* Content Card - Further reduced margin */}
+                        <div className="ml-4 md:ml-4 p-3 md:p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                            <div className="flex flex-col gap-1 mb-3">
                                 <div className="flex items-center gap-2">
                                     <UserAvatar 
                                         imageUrl={item.user?.profileImageUrl} 
-                                        size="w-6 h-6" 
+                                        size="w-5 h-5 md:w-6 md:h-6" 
                                     />
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        {item.user?.name || "System"}
-                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-gray-900 break-words">
+                                            {item.user?.name || "System"}
+                                        </p>
+                                        <span className="text-xs text-gray-500 block mt-0.5">
+                                            {moment(item.createdAt).fromNow()}
+                                        </span>
+                                    </div>
                                 </div>
-                                <span className="text-xs text-gray-500">
-                                    {moment(item.createdAt).fromNow()}
-                                </span>
                             </div>
                             
-                            <p className="text-sm text-gray-700">
-                                {item.details || item.action.replace(/_/g, ' ')}
-                            </p>
+                            <div className="pl-1">
+                                <p className="text-sm text-gray-700 mb-3 break-words">
+                                    {item.details || item.action.replace(/_/g, ' ')}
+                                </p>
+                                
+                                {/* Action Type Badge - Always visible */}
+                                <div className="inline-flex">
+                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${color.replace('text-', 'bg-')} bg-opacity-10`}>
+                                        <Icon className="w-3 h-3" />
+                                        <span className="capitalize">
+                                            {item.action.replace(/_/g, ' ')}
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 );

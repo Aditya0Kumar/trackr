@@ -149,6 +149,7 @@ export const createTask = async (req, res, next) => {
             attachments,
             todoChecklist: initialChecklist,
             createdBy: req.user.id,
+            workspace: req.workspace._id, // Add workspace reference
             statusHistory: [{ user: req.user.id, status: "Pending" }], // Initialize history
             activityLog: [{ user: req.user.id, action: "created_task", details: `Task '${title}' created.` }],
             isArchived: false, // Default to not archived
@@ -188,22 +189,26 @@ export const getTasks = async (req, res, next) => {
             baseArchiveFilter.$or = [{ isArchived: false }, { isArchived: { $exists: false } }];
         }
 
-        let filter = { ...baseArchiveFilter };
-        let sortOptions = { createdAt: -1 }; // Default sort: newest first
+        // Enforce Workspace Isolation
+        let filter = { ...baseArchiveFilter, workspace: req.workspace._id };
+        let baseFilter = { ...baseArchiveFilter, workspace: req.workspace._id };
+        let sortOptions = { createdAt: -1 }; // ADDED THIS BACK
 
         // 1. Base Scope Filter (Determines who the tasks belong to)
-        const summaryBaseFilter = { ...baseArchiveFilter }; // Start with the archive filter
+        const summaryBaseFilter = { ...baseFilter }; // Start with the workspace + archive filter
 
-        if (req.user.role === "user") {
-            // Regular users only see tasks assigned to them
+
+        // Workspace Member Role Logic
+        if (req.workspaceMember.role === "Member") {
+            // Regular Members only see tasks assigned to them
             filter.assignedTo = req.user.id;
             summaryBaseFilter.assignedTo = req.user.id;
-        } else if (req.user.role === "admin" && userId) {
-            // Admin can filter by a specific user ID
+        } else if ((req.workspaceMember.role === "Admin" || req.workspaceMember.role === "Manager") && userId) {
+            // Admin/Managers can filter by a specific user ID
             filter.assignedTo = userId;
             summaryBaseFilter.assignedTo = userId;
         }
-        // If admin and no userId, filter remains empty (sees all tasks)
+        // If Admin/Manager and no userId, filter remains empty (sees all workspace tasks)
 
         // 2. Status Filter
         if (status) {
@@ -275,12 +280,46 @@ export const getTaskById = async (req, res, next) => {
         const task = await Task.findById(req.params.id)
             .populate("assignedTo", "name email profileImageUrl")
             .populate("comments.user", "name profileImageUrl")
-            .populate("statusHistory.user", "name profileImageUrl") // Keep for now, will be replaced by activityLog for display
+            .populate("statusHistory.user", "name profileImageUrl")
             .populate("todoChecklist.completedBy", "name profileImageUrl")
-            .populate("activityLog.user", "name profileImageUrl"); // Populate user for activity log
+            .populate("activityLog.user", "name profileImageUrl")
+            .populate("workspace", "name owner"); // Populate workspace to check ownership/membership if needed elsewhere
 
         if (!task) {
             return next(errorHandler(404, "Task not found!"));
+        }
+
+        // Access Control Logic
+        if (req.workspace) {
+            // Workspace Context: Ensure task belongs to the current workspace
+            if (task.workspace._id.toString() !== req.workspace._id.toString()) {
+                return next(errorHandler(404, "Task not found in this workspace."));
+            }
+        } else {
+            // Personal Context (No Workspace): User must be assigned to the task OR be the creator
+            // OR we could check if user is a member of the task's workspace (more expensive, requires WorkspaceMember lookup)
+            // For Personal Dashboard "My Tasks", checking assignment is the primary implementation.
+            
+            const isAssigned = task.assignedTo.some(u => u._id.toString() === req.user.id.toString());
+            const isCreator = task.createdBy.toString() === req.user.id.toString();
+            
+            if (!isAssigned && !isCreator) {
+                // If not assigned/created, strict fallback: Check if user is Admin/Manager in that workspace.
+                // We'll query WorkspaceMember for this specific task's workspace and this user.
+                const member = await mongoose.model("WorkspaceMember").findOne({
+                    workspace: task.workspace._id,
+                    user: req.user.id
+                });
+
+                if (!member || !["Admin", "Manager", "Owner"].includes(member.role)) {
+                     // Even if member, if not assigned/admin, maybe deny? 
+                     // Usually regular members can see all tasks in workspace. 
+                     // So if member exists, allow.
+                     if (!member) {
+                        return next(errorHandler(403, "Access denied. You are not a member of this task's workspace."));
+                     }
+                }
+            }
         }
 
         res.status(200).json(task);
@@ -303,8 +342,10 @@ export const updateTask = async (req, res, next) => {
         const oldPriority = task.priority;
         const oldDueDate = task.dueDate ? task.dueDate.toISOString() : null;
         const oldAttachments = [...task.attachments];
+
         const oldStatus = task.status;
-        const isAdmin = req.user.role === "admin";
+        const isAdminOrManager = ["Admin", "Manager"].includes(req.workspaceMember.role);
+        const isAdmin = req.workspaceMember.role === "Admin";
 
         // Track changes for activity log
         const activityEntries = [];
@@ -417,14 +458,14 @@ export const updateTask = async (req, res, next) => {
         // Check if status was explicitly updated in the body (e.g., from CreateTask page update)
         if (req.body.status && req.body.status !== oldStatus) {
             
-            // Enforce verification flow: Only admin can set to Completed
-            if (req.body.status === "Completed" && !isAdmin) {
-                return next(errorHandler(403, "Only administrators can mark a task as Completed."));
+            // Enforce verification flow: Only admin/manager can set to Completed
+            if (req.body.status === "Completed" && !isAdminOrManager) {
+                return next(errorHandler(403, "Only administrators or managers can mark a task as Completed."));
             }
             
-            // Prevent Admin from setting Awaiting Verification
-            if (req.body.status === "Awaiting Verification" && isAdmin) {
-                return next(errorHandler(403, "Admins cannot set status to Awaiting Verification."));
+            // Prevent Admin/Manager from setting Awaiting Verification
+            if (req.body.status === "Awaiting Verification" && isAdminOrManager) {
+                return next(errorHandler(403, "Admins/Managers cannot set status to Awaiting Verification."));
             }
 
             task.status = req.body.status;
@@ -546,9 +587,9 @@ export const updateTaskStatus = async (req, res, next) => {
         const isAssigned = task.assignedTo.some(
             (userId) => userId.toString() === req.user.id.toString()
         );
-        const isAdmin = req.user.role === "admin";
+        const isAdminOrManager = ["Admin", "Manager"].includes(req.workspaceMember.role);
 
-        if (!isAssigned && !isAdmin) {
+        if (!isAssigned && !isAdminOrManager) {
             return next(errorHandler(403, "Unauthorized"));
         }
 
@@ -557,8 +598,8 @@ export const updateTaskStatus = async (req, res, next) => {
 
         // 1. Enforce Verification Flow
         if (newStatus === "Completed") {
-            if (!isAdmin) {
-                return next(errorHandler(403, "Only administrators can mark a task as Completed."));
+            if (!isAdminOrManager) {
+                return next(errorHandler(403, "Only administrators or managers can mark a task as Completed."));
             }
             
             // Admin override: If admin sets to Completed, force all checklist items to be completed and verified.
@@ -578,9 +619,9 @@ export const updateTaskStatus = async (req, res, next) => {
             const totalItems = task.todoChecklist.length;
             task.progress = totalItems > 0 ? 100 : 0;
 
-        } else if (newStatus === "Awaiting Verification" && isAdmin) {
+        } else if (newStatus === "Awaiting Verification" && isAdminOrManager) {
             // 2. Prevent Admin from manually setting Awaiting Verification
-            return next(errorHandler(403, "Admins cannot manually set status to Awaiting Verification. This status is set automatically when all checklist items are completed by a user."));
+            return next(errorHandler(403, "Admins/Managers cannot manually set status to Awaiting Verification. This status is set automatically when all checklist items are completed by a user."));
         }
 
 
@@ -634,17 +675,16 @@ export const updateTaskChecklist = async (req, res, next) => {
         const { todoChecklist: incomingChecklist } = req.body; // Incoming: [{ text, completed }]
         const taskId = req.params.id;
         const userId = req.user.id;
-        const isAdmin = req.user.role === "admin";
 
         const task = await Task.findById(taskId);
 
         if (!task) {
             return next(errorHandler(404, "Task not found!"));
         }
-
         const isAssigned = task.assignedTo.some(id => id.toString() === userId.toString());
+        const isAdminOrManager = ["Admin", "Manager"].includes(req.workspaceMember.role);
 
-        if (!isAssigned && !isAdmin) {
+        if (!isAssigned && !isAdminOrManager) {
             return next(
                 errorHandler(403, "Not authorized to update checklist")
             );
@@ -769,8 +809,8 @@ export const verifyTaskChecklistItem = async (req, res, next) => {
         const taskId = req.params.id;
         const userId = req.user.id;
 
-        if (req.user.role !== "admin") {
-            return next(errorHandler(403, "Only administrators can verify checklist items."));
+        if (!["Admin", "Manager"].includes(req.workspaceMember.role)) {
+            return next(errorHandler(403, "Only administrators or managers can verify checklist items."));
         }
 
         const task = await Task.findById(taskId);
@@ -862,7 +902,7 @@ export const getDashboardData = async (req, res, next) => {
     try {
         // Filter for active tasks, including legacy tasks where isArchived is undefined
         const activeFilter = { $or: [{ isArchived: false }, { isArchived: { $exists: false } }] };
-        const baseFilter = activeFilter;
+        const baseFilter = { ...activeFilter, workspace: req.workspace._id }; // Enforce Workspace ID
         
         const totalTasks = await Task.countDocuments(baseFilter);
         const pendingTasks = await Task.countDocuments({ ...baseFilter, status: "Pending" });
@@ -910,7 +950,7 @@ export const userDashboardData = async (req, res, next) => {
         
         // Filter for active tasks, including legacy tasks where isArchived is undefined
         const activeFilter = { $or: [{ isArchived: false }, { isArchived: { $exists: false } }] };
-        const matchFilter = { assignedTo: userObjectId, ...activeFilter };
+        const matchFilter = { assignedTo: userObjectId, ...activeFilter, workspace: req.workspace._id }; // Enforce Workspace ID
 
         const totalTasks = await Task.countDocuments(matchFilter);
         const pendingTasks = await Task.countDocuments({
@@ -930,10 +970,70 @@ export const userDashboardData = async (req, res, next) => {
         const taskDistribution = await getTaskDistribution(matchFilter);
         const taskPriorityLevel = await getTaskPriorityLevel(matchFilter);
 
-        const recentTasks = await Task.find(matchFilter)
-            .sort({ createdAt: -1 })
+        const recentTasks = await Task.find({
+            ...matchFilter,
+            status: { $ne: "Completed" }, // Exclude completed tasks
+            dueDate: { $exists: true, $ne: null } // Must have a due date
+        })
+            .sort({ dueDate: 1 }) // Sort by nearest due date
             .limit(10)
-            .select("title status priority dueDate createdAt");
+            .select("title status priority dueDate createdAt")
+            .populate("workspace", "name"); // Populate workspace name
+
+        res.status(200).json({
+            statistics: {
+                totalTasks,
+                pendingTasks,
+                completedTasks,
+                overdueTasks,
+            },
+            charts: {
+                taskDistribution,
+                taskPriorityLevel,
+            },
+            recentTasks,
+        });
+    }catch(error){
+        next(error);
+    }
+};
+
+export const getPersonalDashboardData = async (req, res, next) => {
+    try{
+        const userId = req.user.id;
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        
+        // Filter for active tasks across ALL workspaces
+        const activeFilter = { $or: [{ isArchived: false }, { isArchived: { $exists: false } }] };
+        const matchFilter = { assignedTo: userObjectId, ...activeFilter }; 
+
+        const totalTasks = await Task.countDocuments(matchFilter);
+        const pendingTasks = await Task.countDocuments({
+            ...matchFilter,
+            status: "Pending",
+        });
+        const completedTasks = await Task.countDocuments({
+            ...matchFilter,
+            status: "Completed",
+        });
+        const overdueTasks = await Task.countDocuments({
+            ...matchFilter,
+            status: { $ne: "Completed" },
+            dueDate: { $lt: new Date() },
+        });
+
+        const taskDistribution = await getTaskDistribution(matchFilter);
+        const taskPriorityLevel = await getTaskPriorityLevel(matchFilter);
+
+        const recentTasks = await Task.find({
+            ...matchFilter,
+            status: { $ne: "Completed" },
+            dueDate: { $exists: true, $ne: null }
+        })
+            .sort({ dueDate: 1 })
+            .limit(10)
+            .select("title status priority dueDate createdAt workspace")
+            .populate("workspace", "name"); // Populate workspace info since it's global
 
         res.status(200).json({
             statistics: {

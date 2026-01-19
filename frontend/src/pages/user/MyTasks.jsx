@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux"; // Import useSelector
 import DashboardLayout from "../../components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axioInstance";
@@ -7,7 +8,12 @@ import TaskCard from "../../components/TaskCard";
 import TaskFilterSort from "../../components/TaskFilterSort";
 import { Search } from "lucide-react";
 
+
 const MyTask = () => {
+    const navigate = useNavigate();
+    const workspaceState = useSelector((state) => state.workspace);
+    const activeWorkspace = workspaceState?.currentWorkspace;
+
     const [allTasks, setAllTasks] = useState([]);
     const [tabs, setTabs] = useState([
         { label: "All", count: 0 },
@@ -19,45 +25,67 @@ const MyTask = () => {
     const [filterStatus, setFilterStatus] = useState("All");
     const [filter, setFilter] = useState({ priority: "All" });
     const [sort, setSort] = useState("createdAtDesc");
-    const [searchTerm, setSearchTerm] = useState(""); // New state for search
+    const [searchTerm, setSearchTerm] = useState(""); 
 
-    const navigate = useNavigate();
 
     const getAllTasks = async () => {
         try {
-            const response = await axiosInstance.get("/tasks", {
+            const endpoint = activeWorkspace ? "/tasks" : "/personal/tasks";
+            
+            const response = await axiosInstance.get(endpoint, {
                 params: {
                     status: filterStatus === "All" ? "" : filterStatus,
                     priority: filter.priority,
                     sort: sort,
-                    search: searchTerm, // Pass search term
+                    search: searchTerm, 
                 },
             });
 
-            if (response?.data) {
-                setAllTasks(
-                    response.data?.tasks?.length > 0 ? response.data.tasks : []
-                );
+            // Handle different response structures
+            if (activeWorkspace) {
+                 // Workspace Mode Response
+                if (response?.data) {
+                    setAllTasks(
+                        response.data?.tasks?.length > 0 ? response.data.tasks : []
+                    );
+                }
+                const statusSummary = response.data?.statusSummary || {};
+                setTabs([
+                    { label: "All", count: statusSummary.all || 0 },
+                    { label: "Pending", count: statusSummary.pendingTasks || 0 },
+                    { label: "In Progress", count: statusSummary.inProgressTasks || 0 },
+                    { label: "Awaiting Verification", count: statusSummary.awaitingVerificationTasks || 0 },
+                    { label: "Completed", count: statusSummary.completedTasks || 0 },
+                ]);
+
+            } else {
+                // Personal Mode Response (/api/personal/tasks)
+                // Response: { allTasks: [], grouped: { overdue: [], dueToday: [], upcoming: [], noDueDate: [] } }
+                
+                // For Personal Mode, we might want to display differently, but for now let's map it to the same list
+                // To support status tabs, we'd need to count them manually from allTasks
+                
+                const tasks = response.data?.allTasks || [];
+                setAllTasks(tasks);
+
+                // Calculate counts manually for tabs
+                const counts = {
+                    all: tasks.length,
+                    pending: tasks.filter(t => t.status === 'Pending').length,
+                    inProgress: tasks.filter(t => t.status === 'InProgress').length,
+                    awaiting: tasks.filter(t => t.status === 'AwaitingVerification').length,
+                    completed: tasks.filter(t => t.status === 'Completed').length,
+                };
+
+                 setTabs([
+                    { label: "All", count: counts.all },
+                    { label: "Pending", count: counts.pending },
+                    { label: "In Progress", count: counts.inProgress },
+                    { label: "Awaiting Verification", count: counts.awaiting },
+                    { label: "Completed", count: counts.completed },
+                ]);
             }
 
-            const statusSummary = response.data?.statusSummary || {};
-
-            setTabs([
-                { label: "All", count: statusSummary.all || 0 },
-                { label: "Pending", count: statusSummary.pendingTasks || 0 },
-                {
-                    label: "In Progress",
-                    count: statusSummary.inProgressTasks || 0,
-                },
-                {
-                    label: "Awaiting Verification",
-                    count: statusSummary.awaitingVerificationTasks || 0,
-                },
-                {
-                    label: "Completed",
-                    count: statusSummary.completedTasks || 0,
-                },
-            ]);
         } catch (error) {
             console.log("Error fetching tasks: ", error);
         }
@@ -78,7 +106,7 @@ const MyTask = () => {
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
                     <div className="flex items-center justify-between gap-4 w-full md:w-auto ">
                         <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                            My Tasks
+                            {activeWorkspace ? `Tasks - ${activeWorkspace.name}` : "My Tasks (All Workspaces)"}
                         </h2>
                     </div>
                 </div>
@@ -112,7 +140,7 @@ const MyTask = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
                     {allTasks?.length > 0 ? (
                         allTasks?.map((item, index) => (
                             <TaskCard
@@ -133,6 +161,7 @@ const MyTask = () => {
                                 }
                                 todoChecklist={item.todoChecklist || []}
                                 onClick={() => handleClick(item._id)}
+                                workspaceName={item.workspace?.name} // Pass workspace name
                             />
                         ))
                     ) : (

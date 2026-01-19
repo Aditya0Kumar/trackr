@@ -2,8 +2,8 @@ import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import { errorHandler } from "../utils/error.js";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "../utils/email.js"; // Import email utility
-import crypto from "crypto"; // Node built-in module
+import { sendEmail } from "../utils/email.js";
+import crypto from "crypto";
 
 export const signup = async (req, res, next) => {
     const { name, email, password, profileImageUrl, adminJoinCode } = req.body;
@@ -25,12 +25,6 @@ export const signup = async (req, res, next) => {
         return next(errorHandler(400, "User already exists"));
     }
 
-    let role = "user";
-
-    if (adminJoinCode && adminJoinCode === process.env.ADMIN_JOIN_CODE) {
-        role = "admin";
-    }
-
     const hashedPassword = bcryptjs.hashSync(password, 10);
 
     const newUser = new User({
@@ -38,7 +32,6 @@ export const signup = async (req, res, next) => {
         email,
         password: hashedPassword,
         profileImageUrl,
-        role,
     });
 
     try {
@@ -74,15 +67,18 @@ export const signin = async (req, res, next) => {
         }
 
         const token = jwt.sign(
-            { id: validUser._id, role: validUser.role },
+            { id: validUser._id },
             process.env.JWT_SECRET
         );
 
         const { password: pass, ...rest } = validUser._doc;
 
-        res.status(200)
-            .cookie("access_token", token, { httpOnly: true })
-            .json(rest);
+        const expiryDate = new Date(Date.now() + 3600000 * 24 * 30); // 30 days
+
+        res
+            .cookie("access_token", token, { httpOnly: true, expires: expiryDate })
+            .status(200)
+            .json({ ...rest, token });
     } catch (error) {
         next(error);
     }
@@ -114,7 +110,6 @@ export const updateUserProfile = async (req, res, next) => {
         user.name = req.body.name || user.name;
         user.email = req.body.email || user.email;
         
-        // Add logic to update profileImageUrl
         if (req.body.profileImageUrl) {
             user.profileImageUrl = req.body.profileImageUrl;
         }
@@ -125,7 +120,7 @@ export const updateUserProfile = async (req, res, next) => {
 
         const updatedUser = await user.save();
 
-        const { password: pass, ...rest } = updatedUser._doc; // Use updatedUser._doc here
+        const { password: pass, ...rest } = updatedUser._doc;
 
         res.status(200).json(rest);
     } catch (error) {

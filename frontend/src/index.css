@@ -8,26 +8,43 @@
   --color-primary: #2172f0;
 }
 
+/* Custom theme variables */
+:root {
+  /* Light Theme (Default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  /* Slate 50 */
+  --text-primary: #1e293b;
+  /* Slate 900 */
+  --text-secondary: #64748b;
+  /* Slate 500 */
+  --border-color: #e2e8f0;
+  /* Slate 200 */
+  --hover-bg: #f1f5f9;
+}
+
+[data-theme='discord'] {
+  /* Discord Dark Theme */
+  --bg-primary: #36393f;
+  --bg-secondary: #2f3136;
+  /* Sidebar */
+  --text-primary: #dcddde;
+  --text-secondary: #b9bbbe;
+  --border-color: #202225;
+  --hover-bg: #40444b;
+}
+
 @layer base {
   html {
     font-family: var(--font-display);
   }
 
   body {
-    background-color: #f1f5f9; /* Slate 100 */
-    color: #1e293b; /* Slate 900 */
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     overflow-x: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
-}
-
-/* Custom theme variables (Light Mode enforced) */
-:root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc; /* Slate 50 */
-  --text-primary: #1e293b; /* Slate 900 */
-  --text-secondary: #64748b; /* Slate 500 */
-  --border-color: #e2e8f0; /* Slate 200 */
 }
 
 /* Smooth transitions */
@@ -46,4 +63,31 @@
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  /* Slate 300 */
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  /* Slate 400 */
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }

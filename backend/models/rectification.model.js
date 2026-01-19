@@ -19,12 +19,17 @@ const rectificationSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        workspace: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Workspace",
+            required: true,
+        },
     },
     { timestamps: true }
 );
 
-// Ensure only one record per user per month/year
-rectificationSchema.index({ user: 1, month: 1, year: 1 }, { unique: true });
+// Ensure only one record per user per month/year per workspace
+rectificationSchema.index({ user: 1, month: 1, year: 1, workspace: 1 }, { unique: true });
 
 const Rectification = mongoose.model("Rectification", rectificationSchema);
 

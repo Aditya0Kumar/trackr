@@ -1,10 +1,11 @@
 import Task from "../models/task.model.js";
 import excelJs from "exceljs";
 import User from "../models/user.model.js";
+import WorkspaceMember from "../models/workspaceMember.model.js";
 
 export const exportTaskReport = async (req, res, next) => {
     try {
-        const tasks = await Task.find().populate("assignedTo", "name email");
+        const tasks = await Task.find({ workspace: req.workspace._id }).populate("assignedTo", "name email");
 
         const workbook = new excelJs.Workbook();
         const worksheet = workbook.addWorksheet("Tasks Report");
@@ -55,9 +56,11 @@ export const exportTaskReport = async (req, res, next) => {
 
 export const exportUsersReport = async (req, res, next) => {
     try {
-        const users = await User.find().select("name email _id").lean();
+        // Fetch all members of the current workspace
+        const members = await WorkspaceMember.find({ workspace: req.workspace._id }).populate("user", "name email _id");
+        const users = members.map(m => m.user); // Extract User documents
 
-        const userTasks = await Task.find().populate(
+        const userTasks = await Task.find({ workspace: req.workspace._id }).populate(
             "assignedTo",
             "name email _id"
         );

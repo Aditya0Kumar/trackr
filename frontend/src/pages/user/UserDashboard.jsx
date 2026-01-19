@@ -19,6 +19,7 @@ const UserDashboard = () => {
     const navigate = useNavigate();
 
     const { currentUser } = useSelector((state) => state.user);
+    const { currentWorkspace } = useSelector((state) => state.workspace);
 
     const [dashboardData, setDashboardData] = useState(null);
     const [pieChartData, setPieChartData] = useState([]);
@@ -50,23 +51,27 @@ const UserDashboard = () => {
 
     const getDashboardData = async () => {
         try {
-            const response = await axiosInstance.get(
-                "/tasks/user-dashboard-data"
-            );
+            // Determine endpoint based on whether we are in a workspace or "My Work" mode
+            const endpoint = currentWorkspace 
+                ? "/tasks/user-dashboard-data" 
+                : "/tasks/personal-dashboard-data";
+
+            const response = await axiosInstance.get(endpoint);
 
             if (response.data) {
                 setDashboardData(response.data);
                 prepareChartData(response.data?.charts || null);
             }
         } catch (error) {
-            console.log("Error fetching user dashboard data: ", error);
+            console.log("Error fetching dashboard data: ", error);
         }
     };
 
     const getAttendanceData = async () => {
         try {
-            // This endpoint defaults to fetching the last 30 days for the current user
-            const response = await axiosInstance.get("/attendance");
+            // Determine endpoint: Global if no workspace, otherwise standard
+            const endpoint = currentWorkspace ? "/attendance" : "/personal/attendance";
+            const response = await axiosInstance.get(endpoint);
             setAttendanceRecords(response.data);
         } catch (error) {
             console.log("Error fetching user attendance data: ", error);
@@ -76,9 +81,7 @@ const UserDashboard = () => {
     useEffect(() => {
         getDashboardData();
         getAttendanceData();
-
-        return () => {};
-    }, []);
+    }, [currentWorkspace]); // Re-fetch when workspace changes
 
     return (
         <DashboardLayout activeMenu={"Dashboard"}>
@@ -95,8 +98,12 @@ const UserDashboard = () => {
                         {/* LEFT SIDE: Text */}
                         <div className="flex-1">
                             <h2 className="text-2xl md:text-3xl font-bold">
-                                Welcome! {currentUser?.name}
+                                {currentWorkspace ? `Welcome to ${currentWorkspace.name}` : "My Work (Personal Dashboard)"}
                             </h2>
+
+                            <p className="text-lg text-gray-700 font-medium md:mt-2">
+                                Hello, {currentUser?.name}
+                            </p>
 
                             <p className="text-gray-500 mt-1">
                                 {moment().format("dddd Do MMMM YYYY")}
@@ -196,7 +203,7 @@ const UserDashboard = () => {
 
                 {/* Charts Section - Now 3 columns */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Attendance Chart */}
+                    {/* Attendance Chart - Shown in both modes (Global or Workspace) */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -205,11 +212,11 @@ const UserDashboard = () => {
                         className="bg-white p-6 rounded-xl border border-gray-200 shadow-md"
                     >
                         <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                            Attendance Summary (30 Days)
+                            {currentWorkspace ? "Attendance Summary (30 Days)" : "My Attendance (All Workspaces)"}
                         </h3>
 
                         <div className="h-80">
-                            {dashboardData ? (
+                            {attendanceRecords?.length > 0 || dashboardData ? (
                                 <AttendanceSummaryChart records={attendanceRecords} />
                             ) : (
                                 <div className="h-full flex items-center justify-center animate-pulse">

@@ -17,6 +17,7 @@ const STATUS_COLORS = ["#EF4444", "#3B82F6", "#F97316", "#22C55E"];
 const Dashboard = () => {
     const navigate = useNavigate();
     const { currentUser } = useSelector((state) => state.user);
+    const { currentWorkspace } = useSelector((state) => state.workspace);
 
     const [dashboardData, setDashboardData] = useState(null);
     const [pieChartData, setPieChartData] = useState([]);
@@ -31,7 +32,7 @@ const Dashboard = () => {
             { status: "In Progress", count: dist.InProgress || 0 },
             { status: "Awaiting Verification", count: dist.AwaitingVerification || 0 },
             { status: "Completed", count: dist.Completed || 0 },
-        ].filter(item => item.count > 0)); // Filter out zero counts for cleaner chart
+        ].filter(item => item.count > 0)); 
 
         setBarChartData([
             { priority: "Low", count: lvl.Low || 0 },
@@ -42,6 +43,10 @@ const Dashboard = () => {
 
     const fetchDashboard = async () => {
         try {
+            // Ensure we have a workspace before fetching if this is workspace-specific
+            // Admin Dashboard is workspace specific.
+            if (!currentWorkspace) return; 
+
             const res = await axiosInstance.get("/tasks/dashboard-data");
             if (res.data) {
                 setDashboardData(res.data);
@@ -54,7 +59,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchDashboard();
-    }, []);
+    }, [currentWorkspace]);
 
     return (
         <DashboardLayout activeMenu="Dashboard">
@@ -149,7 +154,7 @@ const Dashboard = () => {
 
                 {/* STATS */}
                 {dashboardData ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}

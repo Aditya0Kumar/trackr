@@ -1,5 +1,6 @@
 import Notification from "../models/notification.model.js";
 import User from "../models/user.model.js";
+import { io } from "../socket/socket.js";
 
 /**
  * Creates and saves a notification for a list of recipients.
@@ -30,9 +31,16 @@ export const createNotifications = async (
             type,
             message,
             link,
+            isRead: false,
         }));
 
-        await Notification.insertMany(notifications);
+        const savedNotifications = await Notification.insertMany(notifications);
+
+        // Emit real-time notification to each recipient
+        savedNotifications.forEach((notification) => {
+            io.to(notification.recipient.toString()).emit("new_notification", notification);
+        });
+
     } catch (error) {
         console.error("Error creating notifications:", error);
     }

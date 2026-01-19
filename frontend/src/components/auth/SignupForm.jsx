@@ -6,7 +6,6 @@ import {
     ArrowRight,
     UserPlus,
     User,
-    Key,
     Mail,
     Lock,
 } from "lucide-react";
@@ -29,8 +28,6 @@ const SignupForm = ({ onSwitch }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
     const [profilePic, setProfilePic] = useState(null);
-    const [adminInviteToken, setAdminInviteToken] = useState("");
-    const [showAdminInviteToken, setShowAdminInviteToken] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -70,7 +67,6 @@ const SignupForm = ({ onSwitch }) => {
                 email,
                 password,
                 profileImageUrl,
-                adminJoinCode: adminInviteToken,
             });
 
             if (response.data) {
@@ -189,7 +185,7 @@ const SignupForm = ({ onSwitch }) => {
                     </div>
 
                     {/* Admin Invite Token */}
-                    <div>
+                    {/* <div>
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
                             Admin Token (Optional)
                         </label>
@@ -225,7 +221,7 @@ const SignupForm = ({ onSwitch }) => {
                                 )}
                             </button>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Error Message */}
                     <AnimatePresence>

@@ -1,10 +1,13 @@
 import Task from "../models/task.model.js";
 import User from "../models/user.model.js";
+import WorkspaceMember from "../models/workspaceMember.model.js"; // Import WorkspaceMember
 import { errorHandler } from "../utils/error.js";
 
 export const getUsers = async (req, res, next) => {
     try {
-        const users = await User.find({ role: "user" }).select("-password");
+        // Fetch all members of the current workspace
+        const members = await WorkspaceMember.find({ workspace: req.workspace._id }).populate("user", "-password");
+        const users = members.map(m => m.user); // Extract User documents
 
         const userWithTaskCounts = await Promise.all(
             users.map(async (user) => {
@@ -13,26 +16,31 @@ export const getUsers = async (req, res, next) => {
                 const pendingTasks = await Task.countDocuments({
                     assignedTo: userId,
                     status: "Pending",
+                    workspace: req.workspace._id,
                 });
 
                 const inProgressTasks = await Task.countDocuments({
                     assignedTo: userId,
                     status: "In Progress",
+                    workspace: req.workspace._id,
                 });
 
                 const completedTasks = await Task.countDocuments({
                     assignedTo: userId,
                     status: "Completed",
+                    workspace: req.workspace._id,
                 });
 
                 const totalTasks = await Task.countDocuments({
                     assignedTo: userId,
+                    workspace: req.workspace._id,
                 });
 
                 const overdueTasks = await Task.countDocuments({
                     assignedTo: userId,
                     status: { $ne: "Completed" },
                     dueDate: { $lt: new Date() },
+                    workspace: req.workspace._id,
                 });
 
                 const completionRate =

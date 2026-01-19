@@ -6,7 +6,8 @@ import {
     MdOutlineTaskAlt,
     MdPeopleAlt,
     MdPerson,
-    MdCalendarToday, // Import MdCalendarToday for Attendance
+    MdCalendarToday, // Import MdCalendarToday
+    MdSettings, // Import MdSettings
 } from "react-icons/md";
 
 export const SIDE_MENU_DATA = [
@@ -30,24 +31,36 @@ export const SIDE_MENU_DATA = [
     },
     {
         id: 4,
+        label: "Calendar",
+        icon: MdCalendarToday,
+        path: "/calendar",
+    },
+    {
+        id: 5,
         label: "Team Members",
         icon: MdPeopleAlt,
         path: "/admin/users",
     },
     {
-        id: 5,
-        label: "Manage Attendance", // New Admin Link
+        id: 6,
+        label: "Manage Attendance",
         icon: MdCalendarToday,
         path: "/admin/attendance",
     },
     {
-        id: 6,
+        id: 7,
         label: "Profile",
         icon: MdPerson,
         path: "/profile",
     },
     {
-        id: 7,
+        id: 8,
+        label: "Settings",
+        icon: MdSettings,
+        path: "/workspace/settings",
+    },
+    {
+        id: 9,
         label: "Logout",
         icon: MdLogout,
         path: "logout",
@@ -69,18 +82,36 @@ export const USER_SIDE_MENU_DATA = [
     },
     {
         id: 3,
-        label: "My Attendance", // New User Link
+        label: "Calendar",
+        icon: MdCalendarToday,
+        path: "/calendar",
+    },
+    {
+        id: 4,
+        label: "My Attendance",
         icon: MdCalendarToday,
         path: "/user/attendance",
     },
     {
-        id: 4,
+        id: 5,
         label: "Profile",
         icon: MdPerson,
         path: "/profile",
     },
     {
-        id: 5,
+        id: 6,
+        label: "Workspaces",
+        icon: MdDashboardCustomize,
+        path: "/workspace/select",
+    },
+    {
+        id: 7,
+        label: "Settings",
+        icon: MdSettings,
+        path: "/workspace/settings",
+    },
+    {
+        id: 8,
         label: "Logout",
         icon: MdLogout,
         path: "logout",

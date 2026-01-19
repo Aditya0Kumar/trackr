@@ -36,7 +36,7 @@ export const markAttendance = async (req, res, next) => {
                 return next(errorHandler(400, `Invalid status for user ${userId}`));
             }
 
-            const existingRecord = await Attendance.findOne({ user: userId, date: normalizedDate });
+            const existingRecord = await Attendance.findOne({ user: userId, date: normalizedDate, workspace: req.workspace._id });
             
             // A rectification is needed if:
             // 1. It's a past date AND
@@ -51,11 +51,12 @@ export const markAttendance = async (req, res, next) => {
 
             bulkOperations.push({
                 updateOne: {
-                    filter: { user: userId, date: normalizedDate },
+                    filter: { user: userId, date: normalizedDate, workspace: req.workspace._id },
                     update: {
                         $set: {
                             status: status,
                             markedBy: markedBy,
+                            workspace: req.workspace._id,
                         }
                     },
                     upsert: true,
@@ -65,14 +66,14 @@ export const markAttendance = async (req, res, next) => {
 
         // 2. Check Rectification Limit
         if (rectificationsNeeded > 0) {
-            const remaining = await getRemainingRectifications(markedBy);
+            const remaining = await getRemainingRectifications(markedBy, req);
             
             if (rectificationsNeeded > remaining) {
                 return next(errorHandler(403, `Rectification limit exceeded. You have ${remaining} attempts remaining this month.`));
             }
             
             // 3. Increment count before performing bulk write
-            await incrementRectificationCount(markedBy, rectificationsNeeded);
+            await incrementRectificationCount(markedBy, rectificationsNeeded, req);
         }
 
         // 4. Perform Bulk Write
@@ -93,11 +94,11 @@ export const getAttendanceRecords = async (req, res, next) => {
     try {
         const { userId, startDate, endDate } = req.query;
         const requesterId = req.user.id;
-        const requesterRole = req.user.role;
+        const requesterWorkspaceRole = req.workspaceMember.role;
 
-        let filter = {};
+        let filter = { workspace: req.workspace._id }; // Start with workspace filter
 
-        if (requesterRole === 'user') {
+        if (requesterWorkspaceRole === 'Member') {
             // Users can only see their own records
             filter.user = requesterId;
         } else if (userId) {
@@ -111,7 +112,7 @@ export const getAttendanceRecords = async (req, res, next) => {
                 $gte: normalizeDate(startDate),
                 $lte: normalizeDate(endDate),
             };
-        } else if (requesterRole === 'user') {
+        } else if (requesterWorkspaceRole === 'Member') {
              // Default to last 30 days for users if no range specified
              const defaultEndDate = normalizeDate(new Date());
              const defaultStartDate = moment(defaultEndDate).subtract(30, 'days').toDate();

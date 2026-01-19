@@ -1,6 +1,7 @@
 import Task from "../models/task.model.js";
 import { errorHandler } from "../utils/error.js";
 import { createNotifications } from "../utils/notification.js";
+import { io } from "../socket/socket.js";
 
 export const addCommentToTask = async (req, res, next) => {
     try {
@@ -43,6 +44,9 @@ export const addCommentToTask = async (req, res, next) => {
         const updatedTask = await Task.findById(taskId)
             .populate("assignedTo", "name email profileImageUrl")
             .populate("comments.user", "name profileImageUrl");
+
+        // Emit real-time event
+        io.to(taskId).emit("task_comment_added", updatedTask);
 
         res.status(201).json({
             message: "Comment added successfully",

@@ -57,13 +57,10 @@ const LoginForm = ({ onSwitch }) => {
             });
 
             const userData = response.data;
-            dispatch(signInSuccess(userData));
+            dispatch(signInSuccess(userData)); // User slice now extracts token
 
-            if (userData.role === "admin") {
-                navigate("/admin/dashboard");
-            } else {
-                navigate("/user/dashboard");
-            }
+            // Redirect to Personal Dashboard (My Work) by default as requested
+            navigate("/user/dashboard");
         } catch (error) {
             const errorMessage =
                 error.response?.data?.message ||

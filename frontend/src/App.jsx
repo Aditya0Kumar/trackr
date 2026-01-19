@@ -12,7 +12,12 @@ import ManageAttendance from "./pages/admin/ManageAttendance"; // Import Admin A
 import MyAttendance from "./pages/user/MyAttendance"; // Import User Attendance
 import Landing from "./pages/Landing"; // Import Landing Page
 import ForgotPassword from "./pages/auth/ForgotPassword"; // Import ForgotPassword
+import WorkspaceSelect from "./pages/workspace/WorkspaceSelect";
+import CreateWorkspace from "./pages/workspace/CreateWorkspace";
+import JoinWorkspace from "./pages/workspace/JoinWorkspace";
+import WorkspaceSettings from "./pages/workspace/WorkspaceSettings";
 import ResetPassword from "./pages/auth/ResetPassword"; // Import ResetPassword
+import Calendar from "./pages/Calendar"; // Import Calendar
 import { useSelector } from "react-redux";
 
 import toast, { Toaster } from "react-hot-toast";
@@ -30,45 +35,33 @@ const App = () => {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-                    {/* Shared Private Routes */}
-                    <Route element={<PrivateRoute allowedRoles={["admin", "user"]} />}>
+                    {/* Workspace Selection Routes (Authenticated but no workspace context needed) */}
+                    <Route element={<PrivateRoute requireWorkspace={false} />}>
+                        <Route path="/workspace/select" element={<WorkspaceSelect />} />
+                        <Route path="/workspace/create" element={<CreateWorkspace />} />
+                        <Route path="/workspace/join" element={<JoinWorkspace />} />
                         <Route path="/profile" element={<Profile />} />
-                        {/* Task Details is now shared */}
-                        <Route
-                            path="/task-details/:id"
-                            element={<TaskDetails />}
-                        />
+                        {/* Unified Dashboard (Handles both Personal and Workspace views) */}
+                        <Route path="/user/dashboard" element={<UserDashboard />} />
+                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/dashboard" element={<Navigate to="/user/dashboard" replace />} />
+
+                        {/* Global Features (Accessible in both Personal and Workspace modes) */}
+                        <Route path="/user/tasks" element={<MyTasks />} />
+                        <Route path="/user/attendance" element={<MyAttendance />} />
+                        <Route path="/task-details/:id" element={<TaskDetails />} />
                     </Route>
 
-                    {/* Admin Routes */}
-                    <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
-                        <Route
-                            path="/admin/dashboard"
-                            element={<Dashboard />}
-                        />
+                    {/* Workspace Protected Routes (Context Required) */}
+                    <Route element={<PrivateRoute requireWorkspace={true} />}>
+                        
+                        {/* Admin Routes - Access control should be inside components now */}
                         <Route path="/admin/tasks" element={<ManageTasks />} />
                         <Route path="/admin/users" element={<ManageUsers />} />
-                        <Route
-                            path="/admin/create-task"
-                            element={<CreateTask />}
-                        />
-                        <Route
-                            path="/admin/attendance"
-                            element={<ManageAttendance />}
-                        />
-                    </Route>
-
-                    {/* User Routes */}
-                    <Route element={<PrivateRoute allowedRoles={["user"]} />}>
-                        <Route
-                            path="/user/dashboard"
-                            element={<UserDashboard />}
-                        />
-                        <Route path="/user/tasks" element={<MyTasks />} />
-                        <Route
-                            path="/user/attendance"
-                            element={<MyAttendance />}
-                        />
+                        <Route path="/admin/create-task" element={<CreateTask />} />
+                        <Route path="/admin/attendance" element={<ManageAttendance />} />
+                        <Route path="/admin/dashboard" element={<Dashboard />} />
+                        <Route path="/workspace/settings" element={<WorkspaceSettings />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
@@ -85,8 +78,7 @@ const AuthRedirect = () => {
     const { currentUser } = useSelector((state) => state.user);
 
     if (currentUser) {
-        const dashboardPath = currentUser.role === "admin" ? "/admin/dashboard" : "/user/dashboard";
-        return <Navigate to={dashboardPath} replace />;
+        return <Navigate to="/workspace/select" replace />;
     }
 
     return <AuthPage />;

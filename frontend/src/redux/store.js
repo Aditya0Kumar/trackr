@@ -1,19 +1,21 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import userReducer from "./slice/userSlice";
-import uiReducer from "./slice/uiSlice"; // Import uiReducer
+import uiReducer from "./slice/uiSlice";
+import workspaceReducer from "./slice/workspaceSlice";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 
 const rootReducer = combineReducers({
     user: userReducer,
-    ui: uiReducer, // Add uiReducer
+    ui: uiReducer,
+    workspace: workspaceReducer,
 });
 
 const persistConfig = {
     key: "root",
     storage,
     version: 1,
-    whitelist: ['user', 'ui'] // Ensure 'ui' state is persisted
+    whitelist: ['user', 'ui', 'workspace']
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

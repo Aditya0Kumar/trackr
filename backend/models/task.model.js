@@ -59,6 +59,20 @@ const activityLogSchema = new mongoose.Schema(
 
 const taskSchema = new mongoose.Schema(
     {
+        workspace: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Workspace",
+            required: true,
+        },
+        
+        project: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Project",
+            // Optional: a task might belong to a workspace but not a specific project initially, or could be required. 
+            // Based on user request "Projects -> Tasks", let's make it optional for flexibility unless strictly hierarchical.
+            // But usually safer to allow loose tasks or enforce. Let's make it optional for now to avoid breaking if plan changes.
+        },
+
         title: {
             type: String,
             required: true,
@@ -135,6 +149,11 @@ const taskSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+// Index for fetching tasks by workspace
+taskSchema.index({ workspace: 1 });
+// Index for fetching tasks by project
+taskSchema.index({ project: 1 });
 
 const Task = mongoose.model("Task", taskSchema);
 

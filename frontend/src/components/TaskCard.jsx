@@ -18,7 +18,8 @@ const TaskCard = ({
     todoChecklist = [],
     onClick,
     // New prop for optional action button (e.g., Unarchive)
-    actionButton = null, 
+    actionButton = null,
+    workspaceName = null, // New Prop 
 }) => {
     // status colors: Pending=red, In Progress=yellow, Completed=green, Awaiting Verification=orange
     const getStatusTag = () => {
@@ -83,10 +84,18 @@ const TaskCard = ({
         >
             <div>
                 <div className="flex items-center justify-between gap-3 mb-3">
-                    <div
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${statusTag.bg} ${statusTag.text} ${statusTag.border}`}
-                    >
-                        {status}
+                    <div className="flex gap-2">
+                        <div
+                            className={`px-3 py-1 rounded-full text-xs font-semibold border ${statusTag.bg} ${statusTag.text} ${statusTag.border}`}
+                        >
+                            {status}
+                        </div>
+                        {/* Workspace Badge */}
+                        {workspaceName && (
+                            <div className="px-3 py-1 rounded-full text-xs font-semibold border bg-purple-50 text-purple-700 border-purple-200 truncate max-w-[120px]">
+                                {workspaceName}
+                            </div>
+                        )}
                     </div>
 
                     <div

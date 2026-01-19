@@ -1,5 +1,7 @@
 import express from "express";
-import { adminOnly, verifyToken } from "../utils/verifyUser.js";
+import { verifyToken } from "../utils/verifyUser.js";
+import { verifyWorkspace } from "../middleware/workspace.middleware.js";
+import { authorizeRoles } from "../middleware/rbac.middleware.js";
 import {
     createTask,
     deleteTask,
@@ -12,30 +14,40 @@ import {
     userDashboardData,
     verifyTaskChecklistItem,
     unarchiveTask, // Import new function
+    getPersonalDashboardData, // Import new function
 } from "../controller/task.controller.js";
 
 const router = express.Router();
 
-router.post("/create", verifyToken, adminOnly, createTask);
+// 1. Personal Dashboard Route - Bypasses Workspace Middleware
+router.get("/personal-dashboard-data", verifyToken, getPersonalDashboardData);
 
-router.get("/", verifyToken, getTasks);
+// 2. Specific Workspace Routes (Must come BEFORE generic /:id)
+router.get("/dashboard-data", verifyToken, verifyWorkspace, authorizeRoles("Admin", "Manager"), getDashboardData);
 
-router.get("/dashboard-data", verifyToken, adminOnly, getDashboardData);
+router.get("/user-dashboard-data", verifyToken, verifyWorkspace, userDashboardData);
 
-router.get("/user-dashboard-data", verifyToken, userDashboardData);
-
+// 3. Global Task Access (Task Details) - Matches /:id, so must be after specific strings
+// Does NOT use verifyWorkspace automatically (handles own logic)
 router.get("/:id", verifyToken, getTaskById);
 
-router.put("/:id", verifyToken, updateTask);
+// 4. Apply verification and workspace middleware to all other/subsequent task routes
+router.use(verifyToken, verifyWorkspace);
 
-router.delete("/:id", verifyToken, adminOnly, deleteTask); // Archive task
+router.post("/create", authorizeRoles("Admin", "Manager"), createTask);
 
-router.put("/:id/unarchive", verifyToken, adminOnly, unarchiveTask); // Unarchive task
+router.get("/", getTasks);
 
-router.put("/:id/status", verifyToken, updateTaskStatus);
+router.put("/:id", authorizeRoles("Admin", "Manager"), updateTask);
 
-router.put("/:id/todo", verifyToken, updateTaskChecklist);
+router.delete("/:id", authorizeRoles("Admin"), deleteTask); // Archive task
 
-router.put("/:id/todo/verify", verifyToken, adminOnly, verifyTaskChecklistItem); // NEW ROUTE
+router.put("/:id/unarchive", authorizeRoles("Admin"), unarchiveTask); // Unarchive task
+
+router.put("/:id/status", updateTaskStatus);
+
+router.put("/:id/todo", updateTaskChecklist);
+
+router.put("/:id/todo/verify", authorizeRoles("Admin", "Manager"), verifyTaskChecklistItem);
 
 export default router;

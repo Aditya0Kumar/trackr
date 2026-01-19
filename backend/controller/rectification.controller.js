@@ -9,12 +9,12 @@ const MAX_RECTIFICATIONS = 3;
  * @param {string} userId - ID of the admin user.
  * @returns {Promise<{usedCount: number, maxAttempts: number}>}
  */
-const getRectificationStats = async (userId) => {
+const getRectificationStats = async (userId, req) => {
     const now = moment();
     const month = now.month();
     const year = now.year();
 
-    const rectificationRecord = await Rectification.findOne({ user: userId, month, year });
+    const rectificationRecord = await Rectification.findOne({ user: userId, month, year, workspace: req.workspace._id });
 
     const usedCount = rectificationRecord ? rectificationRecord.count : 0;
     return { usedCount, maxAttempts: MAX_RECTIFICATIONS };
@@ -27,13 +27,13 @@ const getRectificationStats = async (userId) => {
  * @param {string} userId - ID of the admin performing the rectification.
  * @param {number} incrementAmount - Amount to increment by.
  */
-export const incrementRectificationCount = async (userId, incrementAmount) => {
+export const incrementRectificationCount = async (userId, incrementAmount, req) => {
     const now = moment();
     const month = now.month();
     const year = now.year();
 
     await Rectification.findOneAndUpdate(
-        { user: userId, month, year },
+        { user: userId, month, year, workspace: req.workspace._id },
         { $inc: { count: incrementAmount } },
         { upsert: true }
     );
@@ -45,15 +45,15 @@ export const incrementRectificationCount = async (userId, incrementAmount) => {
  * @param {string} userId - ID of the admin user.
  * @returns {Promise<number>} Remaining attempts.
  */
-export const getRemainingRectifications = async (userId) => {
-    const { usedCount, maxAttempts } = await getRectificationStats(userId);
+export const getRemainingRectifications = async (userId, req) => {
+    const { usedCount, maxAttempts } = await getRectificationStats(userId, req);
     return Math.max(0, maxAttempts - usedCount);
 };
 
 export const getRectificationAttempts = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const { usedCount, maxAttempts } = await getRectificationStats(userId);
+        const { usedCount, maxAttempts } = await getRectificationStats(userId, req);
         const remaining = Math.max(0, maxAttempts - usedCount);
         
         res.status(200).json({ remainingAttempts: remaining, maxAttempts: maxAttempts });

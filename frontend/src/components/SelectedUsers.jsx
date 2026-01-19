@@ -4,17 +4,29 @@ import { FaUsers } from "react-icons/fa";
 import Modal from "./Modal";
 import AvatarGroup from "./AvatarGroup";
 
+import { useSelector } from "react-redux";
+
 const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
+    const { currentWorkspace } = useSelector((state) => state.workspace);
     const [allUsers, setAllUsers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedUser, setTempSelectedUser] = useState([]);
 
     const getAllUsers = async () => {
+        if (!currentWorkspace) return;
         try {
-            const response = await axiosInstance.get("/users/get-users");
-            if (response.data?.length > 0) setAllUsers(response.data);
+            // Fetch members of the current workspace using correct endpoint
+            const response = await axiosInstance.get(`/workspaces/${currentWorkspace._id}/members`);
+            if (response.data?.length > 0) {
+                // Map workspace members to user objects for the UI
+                const users = response.data.map(member => ({
+                    ...member.user, 
+                    role: member.role
+                }));
+                setAllUsers(users);
+            }
         } catch (error) {
-            console.log("Error fetching users:", error);
+            console.log("Error fetching workspace members:", error);
         }
     };
 
@@ -37,7 +49,7 @@ const SelectedUsers = ({ selectedUser, setSelectedUser }) => {
 
     useEffect(() => {
         getAllUsers();
-    }, []);
+    }, [currentWorkspace]);
 
     useEffect(() => {
         if (selectedUser.length === 0) setTempSelectedUser([]);

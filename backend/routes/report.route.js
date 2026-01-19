@@ -1,5 +1,7 @@
 import express from "express";
-import { adminOnly, verifyToken } from "../utils/verifyUser.js";
+import { verifyToken } from "../utils/verifyUser.js";
+import { verifyWorkspace } from "../middleware/workspace.middleware.js";
+import { authorizeRoles } from "../middleware/rbac.middleware.js";
 import {
     exportTaskReport,
     exportUsersReport,
@@ -7,8 +9,8 @@ import {
 
 const router = express.Router();
 
-router.get("/export/tasks", verifyToken, adminOnly, exportTaskReport);
+router.get("/export/tasks", verifyToken, verifyWorkspace, authorizeRoles("Admin"), exportTaskReport);
 
-router.get("/export/users", verifyToken, adminOnly, exportUsersReport);
+router.get("/export/users", verifyToken, verifyWorkspace, authorizeRoles("Admin"), exportUsersReport);
 
 export default router;

@@ -64,7 +64,8 @@ const TaskDetails = () => {
                 toast.success(`Status updated to ${newStatus}!`);
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.message || "Failed to update status.";
+            const errorMessage =
+                error.response?.data?.message || "Failed to update status.";
             toast.error(errorMessage);
         } finally {
             setIsUpdatingStatus(false);
@@ -83,22 +84,29 @@ const TaskDetails = () => {
         navigate("/admin/create-task", { state: { taskId: id } });
     };
 
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+
     useEffect(() => {
         if (id) {
             getTaskDetailsById();
         }
     }, [id]);
 
-    const activeMenu = currentUser?.role === 'admin' ? 'Manage Task' : 'My Tasks';
-    const isAdmin = currentUser?.role === 'admin';
-    const isAssigned = task?.assignedTo?.some(u => u._id === currentUser?._id);
+    const activeMenu =
+        currentUser?.role === "admin" ? "Manage Task" : "My Tasks";
+    const isAdmin = currentUser?.role === "admin";
+    const isAssigned = task?.assignedTo?.some(
+        (u) => u._id === currentUser?._id
+    );
 
     // Filter status options based on user role and current status
     const getAvailableStatusOptions = () => {
         if (isAdmin) {
             // Admin can set Pending, In Progress, or Finalize & Complete (Override)
             // We exclude Awaiting Verification because that is set automatically by the checklist
-            return STATUS_DATA.filter(s => s.value !== "Awaiting Verification").map(s => {
+            return STATUS_DATA.filter(
+                (s) => s.value !== "Awaiting Verification"
+            ).map((s) => {
                 if (s.value === "Completed") {
                     return { ...s, label: "Finalize & Complete (Override)" };
                 }
@@ -106,7 +114,7 @@ const TaskDetails = () => {
             });
         } else if (isAssigned) {
             // Regular user can only set Pending, In Progress, or Awaiting Verification
-            return STATUS_DATA.filter(s => s.value !== "Completed");
+            return STATUS_DATA.filter((s) => s.value !== "Completed");
         }
         return [];
     };
@@ -124,7 +132,7 @@ const TaskDetails = () => {
                                         <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
                                             {task?.title}
                                         </h2>
-                                        {currentUser?.role === 'admin' && (
+                                        {currentUser?.role === "admin" && (
                                             <button
                                                 onClick={handleEditClick}
                                                 className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition text-sm font-medium"
@@ -150,7 +158,11 @@ const TaskDetails = () => {
                                         {(isAdmin || isAssigned) && (
                                             <div className="relative">
                                                 <button
-                                                    onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                                                    onClick={() =>
+                                                        setIsStatusDropdownOpen(
+                                                            !isStatusDropdownOpen
+                                                        )
+                                                    }
                                                     disabled={isUpdatingStatus}
                                                     className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
                                                         isUpdatingStatus
@@ -169,29 +181,63 @@ const TaskDetails = () => {
                                                 <AnimatePresence>
                                                     {isStatusDropdownOpen && (
                                                         <motion.div
-                                                            initial={{ opacity: 0, y: 10 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            exit={{ opacity: 0, y: 10 }}
+                                                            initial={{
+                                                                opacity: 0,
+                                                                y: 10,
+                                                            }}
+                                                            animate={{
+                                                                opacity: 1,
+                                                                y: 0,
+                                                            }}
+                                                            exit={{
+                                                                opacity: 0,
+                                                                y: 10,
+                                                            }}
                                                             className="absolute left-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-xl z-10 origin-top-left"
                                                         >
                                                             <div className="p-2">
-                                                                {getAvailableStatusOptions().map((statusOption) => (
-                                                                    <button
-                                                                        key={statusOption.value}
-                                                                        onClick={() => handleStatusUpdate(statusOption.value)}
-                                                                        className={`w-full text-left px-3 py-2 text-sm rounded-md transition flex items-center gap-2 ${
-                                                                            task?.status === statusOption.value
-                                                                                ? "bg-indigo-50 text-indigo-700 font-semibold"
-                                                                                : "text-gray-700 hover:bg-gray-100"
-                                                                        }`}
-                                                                    >
-                                                                        {statusOption.value === "Completed" && <CheckCircle className="w-4 h-4 text-green-600" />}
-                                                                        {statusOption.value === "In Progress" && <Loader className="w-4 h-4 text-blue-600" />}
-                                                                        {statusOption.value === "Pending" && <Clock className="w-4 h-4 text-yellow-600" />}
-                                                                        {statusOption.value === "Awaiting Verification" && <AlertTriangle className="w-4 h-4 text-orange-600" />}
-                                                                        {statusOption.label}
-                                                                    </button>
-                                                                ))}
+                                                                {getAvailableStatusOptions().map(
+                                                                    (
+                                                                        statusOption
+                                                                    ) => (
+                                                                        <button
+                                                                            key={
+                                                                                statusOption.value
+                                                                            }
+                                                                            onClick={() =>
+                                                                                handleStatusUpdate(
+                                                                                    statusOption.value
+                                                                                )
+                                                                            }
+                                                                            className={`w-full text-left px-3 py-2 text-sm rounded-md transition flex items-center gap-2 ${
+                                                                                task?.status ===
+                                                                                statusOption.value
+                                                                                    ? "bg-indigo-50 text-indigo-700 font-semibold"
+                                                                                    : "text-gray-700 hover:bg-gray-100"
+                                                                            }`}
+                                                                        >
+                                                                            {statusOption.value ===
+                                                                                "Completed" && (
+                                                                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                                                            )}
+                                                                            {statusOption.value ===
+                                                                                "In Progress" && (
+                                                                                <Loader className="w-4 h-4 text-blue-600" />
+                                                                            )}
+                                                                            {statusOption.value ===
+                                                                                "Pending" && (
+                                                                                <Clock className="w-4 h-4 text-yellow-600" />
+                                                                            )}
+                                                                            {statusOption.value ===
+                                                                                "Awaiting Verification" && (
+                                                                                <AlertTriangle className="w-4 h-4 text-orange-600" />
+                                                                            )}
+                                                                            {
+                                                                                statusOption.label
+                                                                            }
+                                                                        </button>
+                                                                    )
+                                                                )}
                                                             </div>
                                                         </motion.div>
                                                     )}
@@ -284,22 +330,24 @@ const TaskDetails = () => {
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* Comment Section */}
-                            <CommentSection 
-                                taskId={id} 
-                                comments={task?.comments} 
-                                setTask={setTask} 
+                            <CommentSection
+                                taskId={id}
+                                comments={task?.comments}
+                                setTask={setTask}
                             />
                         </div>
 
                         {/* Sidebar Content (Activity Log) */}
                         <div className="md:col-span-1 space-y-6">
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-2">
                                 <h3 className="text-xl font-semibold text-gray-900 border-b border-gray-200 pb-2 mb-4">
                                     Activity Log
                                 </h3>
-                                <TaskActivityLog activityLog={task?.activityLog} />
+                                <TaskActivityLog
+                                    activityLog={task?.activityLog}
+                                />
                             </div>
                         </div>
                     </div>
@@ -314,9 +362,7 @@ export default TaskDetails;
 const InfoBox = ({ label, value }) => {
     return (
         <>
-            <label className="text-xs font-medium text-gray-500">
-                {label}
-            </label>
+            <label className="text-xs font-medium text-gray-500">{label}</label>
 
             <p className="text-[13px] md:text-sm font-medium text-gray-800 mt-0.5">
                 {value}

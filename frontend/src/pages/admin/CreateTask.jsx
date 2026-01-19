@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../../components/DashboardLayout";
 import { MdDelete } from "react-icons/md";
@@ -157,10 +158,12 @@ const CreateTask = () => {
         }
     };
 
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+
     useEffect(() => {
-        if (taskId) getTaskDetailsById();
+        if (taskId && currentWorkspace) getTaskDetailsById();
         // eslint-disable-next-line
-    }, [taskId]);
+    }, [taskId, currentWorkspace]);
 
     return (
         <DashboardLayout activeMenu={"Create Task"}>

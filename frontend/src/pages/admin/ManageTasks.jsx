@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../../utils/axioInstance";
 import DashboardLayout from "../../components/DashboardLayout";
@@ -115,9 +116,13 @@ const ManageTasks = () => {
         }
     };
 
+    const { currentWorkspace } = useSelector((state) => state.workspace);
+
     useEffect(() => {
-        getAllTasks();
-    }, [filterStatus, filter.priority, sort, userId, searchTerm, showArchived]); // Re-fetch when archive state changes
+        if (currentWorkspace) {
+            getAllTasks();
+        }
+    }, [currentWorkspace, filterStatus, filter.priority, sort, userId, searchTerm, showArchived]);
 
     const handleClearFilter = () => {
         navigate("/admin/tasks"); // Navigate back to the base URL to clear user filters

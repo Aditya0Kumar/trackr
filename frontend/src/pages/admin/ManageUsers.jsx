@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axioInstance";
 import DashboardLayout from "../../components/DashboardLayout";
 import { FaFileAlt } from "react-icons/fa";
@@ -7,18 +8,20 @@ import toast from "react-hot-toast";
 import UserProfileModal from "../../components/UserProfileModal"; // Import the new modal
 
 const ManageUsers = () => {
+    const { currentWorkspace } = useSelector((state) => state.workspace);
     const [allUsers, setAllUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null); // State for the user whose profile is open
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const getAllUsers = async () => {
+        if (!currentWorkspace) return;
         try {
             // The backend controller already calculates task stats for each user here
             const response = await axiosInstance.get("/users/get-users");
             if (response.data?.length > 0) setAllUsers(response.data);
         } catch (error) {
             console.log("Error fetching users:", error);
-        }
+         }
     };
 
     const handleCardClick = (user) => {
@@ -51,12 +54,12 @@ const ManageUsers = () => {
 
     useEffect(() => {
         getAllUsers();
-    }, []);
+    }, [currentWorkspace]);
 
     return (
         <DashboardLayout activeMenu={"Team Members"}>
             <div className="mt-5 mb-10 px-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <h2 className="text-xl font-semibold text-gray-900">
                         Team Members
                     </h2>
@@ -66,7 +69,7 @@ const ManageUsers = () => {
                         className="flex items-center gap-2 px-4 py-2
                        bg-white text-gray-700 rounded-lg 
                        border border-gray-300 hover:bg-gray-100
-                       transition shadow-md"
+                       transition shadow-md w-full sm:w-auto justify-center" // added full width on mobile
                         onClick={handleDownloadReport}
                     >
                         <FaFileAlt className="text-lg text-indigo-500" />
