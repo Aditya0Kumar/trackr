@@ -5,9 +5,26 @@ import { errorHandler } from "../utils/error.js";
 
 export const getUsers = async (req, res, next) => {
     try {
+        // Build query for population based on search
+        const searchQuery = req.query.search;
+        let populateQuery = { path: "user", select: "-password" };
+
+        if (searchQuery) {
+            populateQuery.match = {
+                $or: [
+                    { name: { $regex: searchQuery, $options: "i" } },
+                    { email: { $regex: searchQuery, $options: "i" } },
+                ],
+            };
+        }
+
         // Fetch all members of the current workspace
-        const members = await WorkspaceMember.find({ workspace: req.workspace._id }).populate("user", "-password");
-        const users = members.map(m => m.user); // Extract User documents
+        const members = await WorkspaceMember.find({ workspace: req.workspace._id }).populate(populateQuery);
+        
+        // Filter out members where user didn't match (populate returns null)
+        const users = members
+            .filter(m => m.user)
+            .map(m => m.user);
 
         const userWithTaskCounts = await Promise.all(
             users.map(async (user) => {
@@ -75,6 +92,47 @@ export const getUserById = async (req, res, next) => {
         }
 
         res.status(200).json(user);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getConnections = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        
+        // 1. Find all workspaces the current user belongs to
+        const myMemberships = await WorkspaceMember.find({ user: userId });
+        const workspaceIds = myMemberships.map(m => m.workspace);
+
+        // 2. Build population query for search
+        const searchQuery = req.query.search;
+        let populateQuery = { path: "user", select: "_id name email profileImageUrl" };
+        
+        if (searchQuery) {
+            populateQuery.match = {
+                 $or: [
+                    { name: { $regex: searchQuery, $options: "i" } },
+                    { email: { $regex: searchQuery, $options: "i" } },
+                ],
+            };
+        }
+
+        // 3. Find all members in those workspaces
+        const allMembers = await WorkspaceMember.find({ workspace: { $in: workspaceIds } })
+            .populate(populateQuery);
+
+        // 4. Extract unique users, excluding self
+        const uniqueUsers = new Map();
+        allMembers.forEach(m => {
+            if (m.user && m.user._id.toString() !== userId) {
+                if (!uniqueUsers.has(m.user._id.toString())) {
+                    uniqueUsers.set(m.user._id.toString(), m.user);
+                }
+            }
+        });
+
+        res.status(200).json(Array.from(uniqueUsers.values()));
     } catch (error) {
         next(error);
     }

@@ -36,6 +36,33 @@ const initSocket = (server) => {
         socket.on("leave_task", (taskId) => {
             socket.leave(taskId);
         });
+
+        // Chat Events
+        socket.on("join_chat", (conversationId) => {
+            socket.join(`chat_${conversationId}`);
+            console.log(`User ${userId} joined chat_${conversationId}`);
+        });
+
+        socket.on("leave_chat", (conversationId) => {
+            socket.leave(`chat_${conversationId}`);
+        });
+
+        socket.on("join_group", (groupId) => {
+            socket.join(`group_${groupId}`);
+            console.log(`User ${userId} joined group_${groupId}`);
+        });
+
+        socket.on("leave_group", (groupId) => {
+            socket.leave(`group_${groupId}`);
+        });
+
+        socket.on("typing", ({ conversationId, isTyping }) => {
+            socket.to(`chat_${conversationId}`).emit("typing", {
+                userId,
+                isTyping,
+                conversationId
+            });
+        });
     });
 
     return io;

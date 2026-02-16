@@ -119,24 +119,26 @@ const Dashboard = () => {
                             </motion.p>
 
                             {/* BUTTON */}
-                            <motion.button
-                                initial={{ opacity: 0, y: 10 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.4, delay: 0.25 }}
-                                onClick={() => navigate("/admin/create-task")}
-                                className="
-        bg-indigo-600 text-white
-        font-semibold
-        px-5 py-2.5
-        rounded-lg
-        shadow-md
-        hover:bg-indigo-700
-        transition
-      "
-                            >
-                                + Create Task
-                            </motion.button>
+                            {currentWorkspace?.role && ["Admin", "Manager"].includes(currentWorkspace.role) && (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.4, delay: 0.25 }}
+                                    onClick={() => navigate("/admin/create-task")}
+                                    className="
+            bg-indigo-600 text-white
+            font-semibold
+            px-5 py-2.5
+            rounded-lg
+            shadow-md
+            hover:bg-indigo-700
+            transition
+          "
+                                >
+                                    + Create Task
+                                </motion.button>
+                            )}
                         </div>
 
                         {/* RIGHT SIDE: Illustration */}
@@ -284,26 +286,28 @@ const Dashboard = () => {
                     </motion.div>
                 </div>
 
-                {/* Recent Tasks */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                >
-                    {dashboardData ? (
-                        <RecentTasks tasks={dashboardData?.recentTasks} />
-                    ) : (
-                        <div className="bg-white mt-6 border border-gray-200 rounded-xl shadow-lg p-6 animate-pulse">
-                            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-                            <div className="space-y-3">
-                                {[...Array(5)].map((_, i) => (
-                                    <div key={i} className="h-8 bg-gray-100 rounded"></div>
-                                ))}
+                {/* Recent Tasks - Only for Admin/Manager */}
+                {currentWorkspace?.role && ["Admin", "Manager"].includes(currentWorkspace.role) && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        {dashboardData ? (
+                            <RecentTasks tasks={dashboardData?.recentTasks} />
+                        ) : (
+                            <div className="bg-white mt-6 border border-gray-200 rounded-xl shadow-lg p-6 animate-pulse">
+                                <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                                <div className="space-y-3">
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="h-8 bg-gray-100 rounded"></div>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </motion.div>
+                        )}
+                    </motion.div>
+                )}
             </div>
         </DashboardLayout>
     );

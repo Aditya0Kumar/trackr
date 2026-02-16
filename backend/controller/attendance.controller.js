@@ -105,7 +105,6 @@ export const getAttendanceRecords = async (req, res, next) => {
             // Admin can filter by specific user
             filter.user = userId;
         }
-        // If admin and no userId, they see all records (potentially too many, but let's rely on date range)
 
         if (startDate && endDate) {
             filter.date = {
@@ -113,7 +112,7 @@ export const getAttendanceRecords = async (req, res, next) => {
                 $lte: normalizeDate(endDate),
             };
         } else if (requesterWorkspaceRole === 'Member') {
-             // Default to last 30 days for users if no range specified
+             // Default to last 30 days for members
              const defaultEndDate = normalizeDate(new Date());
              const defaultStartDate = moment(defaultEndDate).subtract(30, 'days').toDate();
              filter.date = { $gte: defaultStartDate, $lte: defaultEndDate };

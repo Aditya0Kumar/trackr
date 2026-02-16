@@ -21,11 +21,6 @@ const WorkspaceSettings = () => {
     const [loadingMembers, setLoadingMembers] = useState(false);
 
     const isOwner = currentWorkspace?.owner === currentUser?._id;
-    // We can't rely on currentUser.role string (it might be old global role). 
-    // We should rely on membership record or deduce from access. 
-    // Ideally we pass current member role from wrapper or fetch it.
-    // However, sidebar logic uses currentWorkspace.role if we persisted it there. 
-    // Let's assume currentWorkspace.role is populated by WorkspaceSelect logic as "Admin" etc.
     const userRole = currentWorkspace?.role; 
     const isOwnerOrAdmin = ["Owner", "Admin"].includes(userRole);
 
@@ -115,12 +110,6 @@ const WorkspaceSettings = () => {
         if (!window.confirm("Are you sure you want to leave this workspace?")) return;
         try {
             await axiosInstance.delete(`/workspaces/members/${currentUser._id}`); // Self-removal
-            // Or better endpoint /workspaces/leave
-            // Since removeMember checks ID, if we pass our own membership ID?
-            // Need to find my membership ID first. 
-            // Better: use /workspaces/:id/leave endpoint if exists, or just use removeMember if we know membership ID.
-            // Current `removeMember` uses `memberId`. We need to look it up.
-            // Let's iterate members to find ourselves.
             const membership = members.find(m => m.user._id === currentUser._id);
             if (membership) {
                  await axiosInstance.delete(`/workspaces/members/${membership._id}`);

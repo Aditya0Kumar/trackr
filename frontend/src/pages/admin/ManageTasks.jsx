@@ -249,25 +249,29 @@ const ManageTasks = () => {
                                 }
                                 todoChecklist={item.todoChecklist || []}
                                 onClick={() => handleClick(item)}
-                                actionButton={showArchived ? (
-                                    <button
-                                        onClick={(e) => handleUnarchive(item._id, e)}
-                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 border border-green-300 text-green-700 text-xs font-medium hover:bg-green-200 transition"
-                                        type="button"
-                                    >
-                                        <ArchiveRestore className="w-4 h-4" />
-                                        Restore
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={(e) => handleArchive(item._id, e)}
-                                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-medium hover:bg-red-100 transition"
-                                        type="button"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        Archive
-                                    </button>
-                                )}
+                                actionButton={
+                                    currentWorkspace?.role && ["Admin", "Manager"].includes(currentWorkspace.role) ? (
+                                        showArchived ? (
+                                            <button
+                                                onClick={(e) => handleUnarchive(item._id, e)}
+                                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 border border-green-300 text-green-700 text-xs font-medium hover:bg-green-200 transition"
+                                                type="button"
+                                            >
+                                                <ArchiveRestore className="w-4 h-4" />
+                                                Restore
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => handleArchive(item._id, e)}
+                                                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-medium hover:bg-red-100 transition"
+                                                type="button"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Archive
+                                            </button>
+                                        )
+                                    ) : null
+                                }
                             />
                         ))}
                     </div>

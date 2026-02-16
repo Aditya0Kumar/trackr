@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Task from "../models/task.model.js";
 import { errorHandler } from "../utils/error.js";
 import { createNotifications } from "../utils/notification.js";
+import activityQueue from "../queues/activity.queue.js";
 
 // =================================================================
 // HELPER FUNCTIONS
@@ -167,6 +168,38 @@ export const createTask = async (req, res, next) => {
             `/user/task-details/${task._id}`
         );
         // --- End Notification Logic ---
+        
+        // --- Background Activity Logging ---
+        try {
+            activityQueue.add("log", {
+                workspaceId: req.workspace._id,
+                userId: req.user.id,
+                action: "created_task",
+                entityType: "Task",
+                entityId: task._id,
+                metadata: { title: task.title }
+            });
+        } catch (queueError) {
+            // soft fail, don't block user if logging fails
+            console.error("Failed to add job to activity queue:", queueError);
+        }
+        // --- End Background Activity Logging ---
+        
+        // Invalidate Cache
+        if (redisClient) {
+            const workspaceId = req.workspace._id;
+            
+            // optimized: nuking all task keys to ensure consistency
+            const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+            if (keys.length > 0) {
+                 await redisClient.del(keys);
+            }
+             
+            // force refresh on assignees' dashboards
+            for (const userId of assignedUserIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+        }
 
         res.status(201).json({ message: "Task created successfully", task });
     } catch (error) {
@@ -174,102 +207,120 @@ export const createTask = async (req, res, next) => {
     }
 };
 
+
+import { getOrSetCache } from "../utils/cache.helper.js";
+import redisClient from "../config/redis.js";
+
+
+// ... helper functions remain same
+
 export const getTasks = async (req, res, next) => {
     try {
         const { status, priority, sort, userId, search, archived } = req.query;
 
-        const isArchived = archived === 'true';
+        // Create a unique cache key based on all query parameters
+        // Sort keys to ensure deterministic key generation
+        const queryKey = JSON.stringify({ status, priority, sort, userId, search, archived }, Object.keys({ status, priority, sort, userId, search, archived }).sort());
+        const workspaceId = req.workspace._id;
+        const key = `v1:workspace:${workspaceId}:tasks:${queryKey}`;
 
-        let baseArchiveFilter = {};
-        if (isArchived) {
-            // Only show tasks explicitly marked as archived
-            baseArchiveFilter.isArchived = true;
-        } else {
-            // Show tasks explicitly marked as NOT archived OR tasks where the field doesn't exist (legacy tasks)
-            baseArchiveFilter.$or = [{ isArchived: false }, { isArchived: { $exists: false } }];
-        }
+        // Cache TTL: 30 seconds (Task lists change often)
+        const cacheResult = await getOrSetCache(key, 30, async () => {
+             const isArchived = archived === 'true';
 
-        // Enforce Workspace Isolation
-        let filter = { ...baseArchiveFilter, workspace: req.workspace._id };
-        let baseFilter = { ...baseArchiveFilter, workspace: req.workspace._id };
-        let sortOptions = { createdAt: -1 }; // ADDED THIS BACK
-
-        // 1. Base Scope Filter (Determines who the tasks belong to)
-        const summaryBaseFilter = { ...baseFilter }; // Start with the workspace + archive filter
-
-
-        // Workspace Member Role Logic
-        if (req.workspaceMember.role === "Member") {
-            // Regular Members only see tasks assigned to them
-            filter.assignedTo = req.user.id;
-            summaryBaseFilter.assignedTo = req.user.id;
-        } else if ((req.workspaceMember.role === "Admin" || req.workspaceMember.role === "Manager") && userId) {
-            // Admin/Managers can filter by a specific user ID
-            filter.assignedTo = userId;
-            summaryBaseFilter.assignedTo = userId;
-        }
-        // If Admin/Manager and no userId, filter remains empty (sees all workspace tasks)
-
-        // 2. Status Filter
-        if (status) {
-            filter.status = status;
-        }
-
-        // 3. Priority Filter
-        if (priority && priority !== "All") {
-            filter.priority = priority;
-        }
-        
-        // 4. Search Filter (Applies to title and description)
-        if (search) {
-            const searchRegex = new RegExp(search, 'i');
-            
-            const searchCriteria = {
-                $or: [
-                    { title: { $regex: searchRegex } },
-                    { description: { $regex: searchRegex } },
-                ]
-            };
-            
-            // Merge search criteria with existing filters
-            filter = { ...filter, ...searchCriteria };
-        }
-
-
-        // 5. Sorting Logic
-        if (sort) {
-            switch (sort) {
-                case "dueDateAsc":
-                    sortOptions = { dueDate: 1 };
-                    break;
-                case "dueDateDesc":
-                    sortOptions = { dueDate: -1 };
-                    break;
-                case "createdAtAsc":
-                    sortOptions = { createdAt: 1 };
-                    break;
-                case "createdAtDesc":
-                    sortOptions = { createdAt: -1 };
-                    break;
-                default:
-                    sortOptions = { createdAt: -1 };
+            let baseArchiveFilter = {};
+            if (isArchived) {
+                // Only show tasks explicitly marked as archived
+                baseArchiveFilter.isArchived = true;
+            } else {
+                // Show tasks explicitly marked as NOT archived OR tasks where the field doesn't exist (legacy tasks)
+                baseArchiveFilter.$or = [{ isArchived: false }, { isArchived: { $exists: false } }];
             }
-        }
 
-        // 6. Fetch Tasks
-        const tasks = await Task.find(filter)
-            .sort(sortOptions)
-            .populate("assignedTo", "name email profileImageUrl");
+            // Enforce Workspace Isolation
+            let filter = { ...baseArchiveFilter, workspace: req.workspace._id };
+            let baseFilter = { ...baseArchiveFilter, workspace: req.workspace._id };
+            let sortOptions = { createdAt: -1 }; // ADDED THIS BACK
 
-        const tasksWithMetrics = await calculateTaskMetrics(tasks);
+            // 1. Base Scope Filter (Determines who the tasks belong to)
+            const summaryBaseFilter = { ...baseFilter }; // Start with the workspace + archive filter
 
-        // 7. Status Summary (calculated based on summaryBaseFilter)
-        const statusSummary = await calculateStatusSummary(summaryBaseFilter);
 
-        res.status(200).json({
-            tasks: tasksWithMetrics,
-            statusSummary,
+            // Workspace Member Role Logic
+            if (req.workspaceMember.role === "Member") {
+                // Regular Members only see tasks assigned to them
+                filter.assignedTo = req.user.id;
+                summaryBaseFilter.assignedTo = req.user.id;
+            } else if ((req.workspaceMember.role === "Admin" || req.workspaceMember.role === "Manager") && userId) {
+                // Admin/Managers can filter by a specific user ID
+                filter.assignedTo = userId;
+                summaryBaseFilter.assignedTo = userId;
+            }
+            // If Admin/Manager and no userId, filter remains empty (sees all workspace tasks)
+
+            // 2. Status Filter
+            if (status) {
+                filter.status = status;
+            }
+
+            // 3. Priority Filter
+            if (priority && priority !== "All") {
+                filter.priority = priority;
+            }
+            
+            // 4. Search Filter (Applies to title and description)
+            if (search) {
+                const searchRegex = new RegExp(search, 'i');
+                
+                const searchCriteria = {
+                    $or: [
+                        { title: { $regex: searchRegex } },
+                        { description: { $regex: searchRegex } },
+                    ]
+                };
+                
+                // Merge search criteria with existing filters
+                filter = { ...filter, ...searchCriteria };
+            }
+
+
+            // 5. Sorting Logic
+            if (sort) {
+                switch (sort) {
+                    case "dueDateAsc":
+                        sortOptions = { dueDate: 1 };
+                        break;
+                    case "dueDateDesc":
+                        sortOptions = { dueDate: -1 };
+                        break;
+                    case "createdAtAsc":
+                        sortOptions = { createdAt: 1 };
+                        break;
+                    case "createdAtDesc":
+                        sortOptions = { createdAt: -1 };
+                        break;
+                    default:
+                        sortOptions = { createdAt: -1 };
+                }
+            }
+
+            // 6. Fetch Tasks
+            const tasks = await Task.find(filter)
+                .sort(sortOptions)
+                .populate("assignedTo", "name email profileImageUrl");
+
+            const tasksWithMetrics = await calculateTaskMetrics(tasks);
+
+            // 7. Status Summary (calculated based on summaryBaseFilter)
+            const statusSummary = await calculateStatusSummary(summaryBaseFilter);
+
+            return {
+                tasks: tasksWithMetrics,
+                statusSummary,
+            };
         });
+
+        res.status(200).json(cacheResult);
     } catch (error) {
         next(error);
     }
@@ -523,6 +574,26 @@ export const updateTask = async (req, res, next) => {
         }
         // --- End Notification Logic ---
 
+        // Invalidate Cache
+        if (redisClient) {
+            const workspaceId = task.workspace._id || task.workspace; // Ensure ID
+            // Invalidate all tasks list for workspace
+            const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+            if (keys.length > 0) await redisClient.del(keys);
+            
+            // Invalidate Personal Dashboards
+            // 1. New assignees
+            const newAssignedToIds = task.assignedTo.map(id => id.toString());
+            for (const userId of newAssignedToIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+            // 2. Old assignees (if changed)
+            if (oldAssignedTo) {
+                 for (const userId of oldAssignedTo) {
+                    await redisClient.del(`v1:personal:${userId}:dashboard`);
+                }
+            }
+        }
 
         return res
             .status(200)
@@ -545,6 +616,18 @@ export const archiveTask = async (req, res, next) => {
         task.activityLog.push({ user: req.user.id, action: "archived_task", details: `Task archived by ${req.user.name}.` });
         await task.save();
 
+        if (redisClient) {
+             const workspaceId = task.workspace._id || task.workspace;
+             const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+             if (keys.length > 0) await redisClient.del(keys);
+             
+             // Invalidate Personal Dashboards
+             const assignedUserIds = task.assignedTo.map(id => id.toString());
+             for (const userId of assignedUserIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+        }
+
         res.status(200).json({ message: "Task archived successfully!" });
     } catch (error) {
         next(error);
@@ -563,6 +646,18 @@ export const unarchiveTask = async (req, res, next) => {
         task.isArchived = false;
         task.activityLog.push({ user: req.user.id, action: "unarchived_task", details: `Task restored from archive by ${req.user.name}.` });
         await task.save();
+
+        if (redisClient) {
+             const workspaceId = task.workspace._id || task.workspace;
+             const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+             if (keys.length > 0) await redisClient.del(keys);
+             
+             // Invalidate Personal Dashboards
+             const assignedUserIds = task.assignedTo.map(id => id.toString());
+             for (const userId of assignedUserIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+        }
 
         res.status(200).json({ message: "Task restored successfully!" });
     } catch (error) {
@@ -655,6 +750,19 @@ export const updateTaskStatus = async (req, res, next) => {
             );
         }
         // --- End Notification Logic ---
+
+        // Invalidate Cache
+        if (redisClient) {
+            const workspaceId = task.workspace._id || task.workspace;
+            const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+            if (keys.length > 0) await redisClient.del(keys);
+            
+            // Invalidate Personal Dashboards for assigned users
+             const assignedUserIds = task.assignedTo.map(id => id.toString());
+             for (const userId of assignedUserIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+        }
 
         // Re-fetch and populate the task to include the new history entry's user details
         const updatedTask = await Task.findById(req.params.id)
@@ -785,6 +893,19 @@ export const updateTaskChecklist = async (req, res, next) => {
             );
         }
         // --- End Notification Logic ---
+        
+        // Invalidate Cache
+        if (redisClient) {
+            const workspaceId = task.workspace._id || task.workspace;
+            const keys = await redisClient.keys(`v1:workspace:${workspaceId}:tasks:*`);
+            if (keys.length > 0) await redisClient.del(keys);
+            
+             // Invalidate Personal Dashboards for assigned users
+             const assignedUserIds = task.assignedTo.map(id => id.toString());
+             for (const userId of assignedUserIds) {
+                await redisClient.del(`v1:personal:${userId}:dashboard`);
+            }
+        }
 
         // Re-fetch and populate the task
         const populatedTask = await Task.findById(taskId)
@@ -994,61 +1115,6 @@ export const userDashboardData = async (req, res, next) => {
             recentTasks,
         });
     }catch(error){
-        next(error);
-    }
-};
-
-export const getPersonalDashboardData = async (req, res, next) => {
-    try{
-        const userId = req.user.id;
-        const userObjectId = new mongoose.Types.ObjectId(userId);
-        
-        // Filter for active tasks across ALL workspaces
-        const activeFilter = { $or: [{ isArchived: false }, { isArchived: { $exists: false } }] };
-        const matchFilter = { assignedTo: userObjectId, ...activeFilter }; 
-
-        const totalTasks = await Task.countDocuments(matchFilter);
-        const pendingTasks = await Task.countDocuments({
-            ...matchFilter,
-            status: "Pending",
-        });
-        const completedTasks = await Task.countDocuments({
-            ...matchFilter,
-            status: "Completed",
-        });
-        const overdueTasks = await Task.countDocuments({
-            ...matchFilter,
-            status: { $ne: "Completed" },
-            dueDate: { $lt: new Date() },
-        });
-
-        const taskDistribution = await getTaskDistribution(matchFilter);
-        const taskPriorityLevel = await getTaskPriorityLevel(matchFilter);
-
-        const recentTasks = await Task.find({
-            ...matchFilter,
-            status: { $ne: "Completed" },
-            dueDate: { $exists: true, $ne: null }
-        })
-            .sort({ dueDate: 1 })
-            .limit(10)
-            .select("title status priority dueDate createdAt workspace")
-            .populate("workspace", "name"); // Populate workspace info since it's global
-
-        res.status(200).json({
-            statistics: {
-                totalTasks,
-                pendingTasks,
-                completedTasks,
-                overdueTasks,
-            },
-            charts: {
-                taskDistribution,
-                taskPriorityLevel,
-            },
-            recentTasks,
-        });
-    } catch (error) {
         next(error);
     }
 };

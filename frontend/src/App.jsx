@@ -18,6 +18,8 @@ import JoinWorkspace from "./pages/workspace/JoinWorkspace";
 import WorkspaceSettings from "./pages/workspace/WorkspaceSettings";
 import ResetPassword from "./pages/auth/ResetPassword"; // Import ResetPassword
 import Calendar from "./pages/Calendar"; // Import Calendar
+import PersonalChat from "./pages/chat/PersonalChat";
+import WorkspaceChat from "./pages/workspace/WorkspaceChat";
 import { useSelector } from "react-redux";
 
 import toast, { Toaster } from "react-hot-toast";
@@ -50,6 +52,7 @@ const App = () => {
                         <Route path="/user/tasks" element={<MyTasks />} />
                         <Route path="/user/attendance" element={<MyAttendance />} />
                         <Route path="/task-details/:id" element={<TaskDetails />} />
+                        <Route path="/messages" element={<PersonalChat />} />
                     </Route>
 
                     {/* Workspace Protected Routes (Context Required) */}
@@ -62,6 +65,7 @@ const App = () => {
                         <Route path="/admin/attendance" element={<ManageAttendance />} />
                         <Route path="/admin/dashboard" element={<Dashboard />} />
                         <Route path="/workspace/settings" element={<WorkspaceSettings />} />
+                        <Route path="/workspace/chat" element={<WorkspaceChat />} />
                     </Route>
                 </Routes>
             </BrowserRouter>

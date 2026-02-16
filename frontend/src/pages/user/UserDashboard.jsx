@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import UserDashboardIllustration from "../../assets/undraw_construction-workers_z99i.svg";
 import AttendanceSummaryChart from "../../components/attendance/AttendanceSummaryChart";
 import DashboardStatSkeleton from "../../components/DashboardStatSkeleton";
+import { MessageSquare, ArrowRight } from "lucide-react";
 
 // Standardized Status Colors: Red (Pending), Blue (In Progress), Orange (Awaiting Verification), Green (Completed)
 const STATUS_COLORS = ["#EF4444", "#3B82F6", "#F97316", "#22C55E"]; 
@@ -54,7 +55,7 @@ const UserDashboard = () => {
             // Determine endpoint based on whether we are in a workspace or "My Work" mode
             const endpoint = currentWorkspace 
                 ? "/tasks/user-dashboard-data" 
-                : "/tasks/personal-dashboard-data";
+                : "/personal/dashboard";
 
             const response = await axiosInstance.get(endpoint);
 
@@ -111,6 +112,14 @@ const UserDashboard = () => {
                             <p className="text-sm text-gray-600 mt-4 max-w-md">
                                 Stay focused on your assigned tasks and track your progress efficiently.
                             </p>
+                            
+                            {/* Focus Score Badge */}
+                            {!currentWorkspace && dashboardData?.statistics?.focusScore !== undefined && (
+                                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-semibold border border-indigo-100">
+                                    <span>🎯 Focus Score:</span>
+                                    <span>{dashboardData.statistics.focusScore}%</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* RIGHT SIDE: Illustration */}
@@ -276,6 +285,27 @@ const UserDashboard = () => {
                         </div>
                     </motion.div>
                 </div>
+
+                {/* Personal Messages Section (Only in Personal Mode) */}
+                {!currentWorkspace && (
+                     <div className="bg-white rounded-xl border border-gray-200 shadow-md p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-indigo-100 text-indigo-600 rounded-full">
+                                <MessageSquare size={24} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">Personal Messages</h3>
+                                <p className="text-gray-500 text-sm">You have unread conversations waiting.</p>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => navigate("/messages")}
+                            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"
+                        >
+                            Open Messages <ArrowRight size={16} />
+                        </button>
+                    </div>
+                )}
 
                 {/* Recent Task Section */}
                 <motion.div

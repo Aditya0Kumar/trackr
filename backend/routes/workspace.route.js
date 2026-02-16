@@ -32,7 +32,7 @@ router.patch("/members/:memberId/role", verifyToken, verifyWorkspace, authorizeR
 // New Routes
 router.post("/join", verifyToken, joinWorkspace); // No workspace context needed initially? Actually logic checks invite code.
 router.get("/:id/summary", verifyToken, verifyWorkspace, getWorkspaceSummary);
-router.get("/:id/members", verifyToken, verifyWorkspace, getWorkspaceMembers); // Open to all members
+router.get("/:id/members", verifyToken, verifyWorkspace, authorizeRoles("Admin", "Manager"), getWorkspaceMembers); // Restricted
 router.patch("/:id", verifyToken, verifyWorkspace, authorizeRoles("Admin"), updateWorkspace); // Admin/Owner
 router.post("/:id/regenerate-invite", verifyToken, verifyWorkspace, authorizeRoles("Admin"), regenerateInviteCode);
 router.post("/:id/transfer-ownership", verifyToken, verifyWorkspace, authorizeRoles("Admin"), transferOwnership); // Owner check is in controller

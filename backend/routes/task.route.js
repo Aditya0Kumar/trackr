@@ -14,16 +14,15 @@ import {
     userDashboardData,
     verifyTaskChecklistItem,
     unarchiveTask, // Import new function
-    getPersonalDashboardData, // Import new function
 } from "../controller/task.controller.js";
 
 const router = express.Router();
 
 // 1. Personal Dashboard Route - Bypasses Workspace Middleware
-router.get("/personal-dashboard-data", verifyToken, getPersonalDashboardData);
+// router.get("/personal-dashboard-data",verifyToken, getPersonalDashboardData);
 
 // 2. Specific Workspace Routes (Must come BEFORE generic /:id)
-router.get("/dashboard-data", verifyToken, verifyWorkspace, authorizeRoles("Admin", "Manager"), getDashboardData);
+router.get("/dashboard-data", verifyToken, verifyWorkspace, getDashboardData);
 
 router.get("/user-dashboard-data", verifyToken, verifyWorkspace, userDashboardData);
 

@@ -8,6 +8,7 @@ import UserAvatar from "./UserAvatar";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
+import { MessageCircle } from "lucide-react";
 
 const Navbar = ({ activeMenu }) => {
     const [open, setOpen] = useState(false);
@@ -38,6 +39,11 @@ const Navbar = ({ activeMenu }) => {
             <div className="flex items-center gap-4">
                 {/* Notification Dropdown */}
                 <NotificationDropdown />
+
+                {/* Personal Chat Icon */}
+                 <Link to="/messages" className="p-2 rounded-full hover:bg-[var(--hover-bg)] transition text-[var(--text-primary)]">
+                    <MessageCircle className="text-2xl" />
+                </Link>
 
                 {/* User Profile Link */}
                 <Link to="/profile" className="flex items-center gap-3 p-1 rounded-full hover:bg-[var(--hover-bg)] transition text-[var(--text-primary)]">

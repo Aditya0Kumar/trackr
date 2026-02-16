@@ -8,6 +8,7 @@ import {
     MdPerson,
     MdCalendarToday, // Import MdCalendarToday
     MdSettings, // Import MdSettings
+    MdMessage, // Import MdMessage
 } from "react-icons/md";
 
 export const SIDE_MENU_DATA = [
@@ -55,12 +56,18 @@ export const SIDE_MENU_DATA = [
     },
     {
         id: 8,
+        label: "Messages",
+        icon: MdMessage,
+        path: "/workspace/chat",
+    },
+    {
+        id: 9,
         label: "Settings",
         icon: MdSettings,
         path: "/workspace/settings",
     },
     {
-        id: 9,
+        id: 10,
         label: "Logout",
         icon: MdLogout,
         path: "logout",

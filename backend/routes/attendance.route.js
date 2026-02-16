@@ -6,7 +6,7 @@ import { markAttendance, getAttendanceRecords } from "../controller/attendance.c
 
 const router = express.Router();
 
-router.post("/mark", verifyToken, verifyWorkspace, authorizeRoles("Admin"), markAttendance);
+router.post("/mark", verifyToken, verifyWorkspace, markAttendance);
 
 // Shared route to get attendance records (filtered by user role/query) - ADDED WORKSPACE CHECK
 router.get("/", verifyToken, verifyWorkspace, getAttendanceRecords);
