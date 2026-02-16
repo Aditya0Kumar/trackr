@@ -1,23 +1,44 @@
 
-# Trackr: Construction Project Management System
+# Trackr: Multi-Tenant Project Management System
 
-Trackr is a robust, full-stack project management platform tailored for the construction industry. It streamlines task assignment, workforce management, progress tracking, and real-time collaboration across multiple workspaces.
+Trackr is a robust, full-stack multi-tenant project management system. It streamlines task assignment, workforce management, progress tracking, and real-time collaboration across multiple workspaces.
 
-## Key Features
+### Multi-Workspace Architecture
+*   **Data Isolation**: Every workspace functions as an independent environment with its own members, projects, and tasks, ensuring complete data separation.
+*   **Seamless Context Switching**: Users can belong to multiple workspaces and switch between them instantly without re-authentication.
+*   **Invitation System**: Workspaces support member onboarding via unique invite links or admin-generated join codes.
 
-*   **Multi-Workspace Architecture**: Seamlessly switch between different project environments with isolated data and roles.
-*   **Role-Based Access Control (RBAC)**: secure hierarchy with distinct permissions for Owners, Admins, Managers, and Members.
-*   **Task Management**: Create, assign, and track tasks with priorities, due dates, checklists, and attachments.
-*   **Real-Time Collaboration**:
-    *   **Live Chat**: Private messaging and workspace-wide group chats powered by Socket.io.
-    *   **Notifications**: Instant updates on task assignments and messages.
-*   **Performance & Scalability**:
-    *   **Redis Caching**: Read-through caching for high-frequency data (dashboards, task lists) to reduce DB load.
-    *   **BullMQ Background Jobs**: Asynchronous processing for heavy tasks like activity logging and report generation.
-    *   **Rate Limiting**: Layered protection against API abuse and spam.
-*   **Workforce Management**: Track attendance, manage leaves, and view member profiles.
+### Role-Based Access Control (RBAC)
+A strict hierarchical permission system ensures data security:
+*   **Owner**: Full control over workspace settings, billing, and deletion.
+*   **Admin**: Manages members, roles, and workspace configurations.
+*   **Manager**: Oversees projects, assigns tasks, and views team performance.
+*   **Member**: Focuses on assigned tasks, personal dashboard, and chat; restricted from administrative actions.
 
-## 🛠️ Tech Stack
+### Advanced Task Management
+*   **Kanban-Style Statuses**: Tasks move through a defined lifecycle (Pending -> In Progress -> Awaiting Verification -> Completed).
+*   **Granular Tracking**: Break down complex tasks with sub-checklists and track completion percentages.
+*   **Rich Context**: Tasks support file attachments (images/docs), priority levels (High/Medium/Low), and due date tracking.
+*   **Activity History**: Every action (creation, status change, comment) is logged for full auditability.
+
+### Real-Time Collaboration
+Powered by Socket.io for instant updates:
+*   **Live Messaging**: Supports 1:1 Direct Messages and Workspace-wide Group Chats.
+*   **Interactive Features**: See who is online, typing indicators, and read receipts in real-time.
+*   **Instant Notifications**: Get alerted immediately when you are assigned a task or receive a message.
+
+### Performance & Scalability
+Engineered for speed and reliability:
+*   **Redis Caching**: Implements a "Read-Through" strategy for dashboards and task lists, reducing database load by serving cached data for frequent requests (TTL: 30-60s).
+*   **BullMQ Background Jobs**: Offloads heavy write operations (like Activity Logging and Email Notifications) to an asynchronous worker queue, keeping API response times fast.
+*   **Rate Limiting**: Protects the API with layered limits—stricter controls for Authentication (10 req/15m) and Chat (100 msg/10m) to prevent abuse.
+
+### Workforce Management
+*   **Attendance Tracking**: Members can mark daily attendance (Present/Absent/Leave).
+*   **Rectification System**: Allows members to correct past attendance records, subject to a strict monthly limit to prevent gamification.
+*   **User Profiles**: Comprehensive profiles showcasing role, contact info, and activity history.
+
+## Tech Stack
 
 ### Backend
 *   **Runtime**: Node.js
@@ -35,7 +56,7 @@ Trackr is a robust, full-stack project management platform tailored for the cons
 *   **Animations**: Framer Motion
 *   **HTTP Client**: Axios
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### 1. Prerequisites
 *   Node.js (v18+)
